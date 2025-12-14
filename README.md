@@ -1,0 +1,1 @@
+# BurnCare-AI
