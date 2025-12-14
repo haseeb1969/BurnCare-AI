@@ -1,0 +1,5 @@
+{
+  "name": "BurnCare AI",
+  "description": "Advanced burn-care mortality prediction system using AI analysis. Simulates a full-stack medical application with patient management and risk assessment.",
+  "requestFramePermissions": []
+}

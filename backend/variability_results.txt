@@ -1,0 +1,12 @@
+ID  | Age | TBSA | Inhal | Depth      | Pred (%)   | Risk      
+---------------------------------------------------------------------------
+1   | 20  | 5    | F     | Superficia | 0.0        | Low       
+2   | 35  | 15   | F     | Partial Th | 0.0        | Low       
+3   | 40  | 30   | F     | Partial Th | 0.0        | Low       
+4   | 40  | 30   | T     | Superficia | 4.363796110281899 | Low       
+5   | 50  | 50   | F     | Full Thick | 33.568968648643235 | Medium    
+6   | 75  | 25   | F     | Superficia | 0.0        | Low       
+7   | 30  | 40   | F     | Superficia | 17.980867127782947 | Low       
+8   | 30  | 70   | F     | Full Thick | 46.69708146032964 | Medium    
+9   | 30  | 60   | F     | Superficia | 46.84368314448923 | Medium    
+10  | 80  | 90   | T     | Superficia | 56.7217303624127 | Medium    

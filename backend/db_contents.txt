@@ -1,0 +1,1295 @@
+======================================================================
+DATABASE: burncare.db - FULL PATIENT RECORDS
+======================================================================
+
+######################################################################
+PATIENT: ahmad (ID: 001)
+######################################################################
+
+--- [1] BASIC DEMOGRAPHICS ---
+  Created: 2025-12-10T23:11:32.252106
+  Age:     45
+  Gender:  Male
+  Status:  Active
+
+--- [2] BURN INJURY ---
+  TBSA:       36.0%
+  Depth:      Full Thickness
+  Inhalation: Yes
+
+--- [3] INITIAL ASSESSMENT (Baseline) ---
+  Hemodynamics:
+    - HR:   67.0 bpm
+    - BP:   98.0/68.0 mmHg
+    - Temp: 38.6 °C
+  Respiratory:
+    - SPO2: 85.0%
+    - PaO2: 87.0
+    - FiO2: 21.0
+  Renal:
+    - Urine Output: 38.0 ml/hr
+  Labs:
+    - Platelets:  25.0
+    - Bilirubin:  10.0
+    - Creatinine: 10.0
+  Neurological (GCS):
+    - Eye:    3
+    - Verbal: 2
+    - Motor:  3
+    - TOTAL:  8/15
+
+--- [4] AI PREDICTION ---
+  [BASELINE] Mortality Risk: 53.937148967069334%
+  [BASELINE] Risk Level:     Medium
+  [BASELINE] SOFA Score:     13.0
+
+  [CURRENT]  Mortality Risk: 0.9221338629722595%
+  [CURRENT]  Risk Level:     Low
+  [CURRENT]  SOFA Score:     13.0
+
+--- [5] HOURLY VITALS HISTORY ---
+  Update #1 [2025-12-10T23:11:32.252085]:
+    HR: 67 | BP: 98/68 | SPO2: 85 | Temp: 38.6 | Urine: 38
+    GCS: E3 V2 M3
+  Update #2 [2025-12-10T18:12:02.036Z]:
+    HR: 74 | BP: 114/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M4
+  Update #3 [2025-12-10T18:12:19.146Z]:
+    HR: 74 | BP: 114/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #4 [2025-12-10T18:12:29.619Z]:
+    HR: 74 | BP: 110/86 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+
+######################################################################
+PATIENT: abcd (ID: 002)
+######################################################################
+
+--- [1] BASIC DEMOGRAPHICS ---
+  Created: 2025-12-10T23:18:09.751617
+  Age:     45
+  Gender:  Male
+  Status:  Active
+
+--- [2] BURN INJURY ---
+  TBSA:       72.0%
+  Depth:      Superficial
+  Inhalation: No
+
+--- [3] INITIAL ASSESSMENT (Baseline) ---
+  Hemodynamics:
+    - HR:   70.0 bpm
+    - BP:   120.0/80.0 mmHg
+    - Temp: 37.0 °C
+  Respiratory:
+    - SPO2: 83.0%
+    - PaO2: 82.0
+    - FiO2: 21.0
+  Renal:
+    - Urine Output: 50.0 ml/hr
+  Labs:
+    - Platelets:  25.0
+    - Bilirubin:  20.0
+    - Creatinine: 10.0
+  Neurological (GCS):
+    - Eye:    3
+    - Verbal: 3
+    - Motor:  3
+    - TOTAL:  9/15
+
+--- [4] AI PREDICTION ---
+  [BASELINE] Mortality Risk: 70.73478606689315%
+  [BASELINE] Risk Level:     High
+  [BASELINE] SOFA Score:     15.0
+
+  [CURRENT]  Mortality Risk: 0.3648107647895813%
+  [CURRENT]  Risk Level:     Low
+  [CURRENT]  SOFA Score:     15.0
+
+--- [5] HOURLY VITALS HISTORY ---
+  Update #1 [2025-12-10T23:18:09.751596]:
+    HR: 70 | BP: 120/80 | SPO2: 83 | Temp: 37 | Urine: 50
+    GCS: E3 V3 M3
+  Update #2 [2025-12-10T18:18:26.688Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #3 [2025-12-10T18:18:47.085Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #4 [2025-12-10T18:18:54.755Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+
+######################################################################
+PATIENT: amjad (ID: 003)
+######################################################################
+
+--- [1] BASIC DEMOGRAPHICS ---
+  Created: 2025-12-10T23:48:23.717154
+  Age:     45
+  Gender:  Male
+  Status:  Active
+
+--- [2] BURN INJURY ---
+  TBSA:       40.5%
+  Depth:      Full Thickness
+  Inhalation: No
+
+--- [3] INITIAL ASSESSMENT (Baseline) ---
+  Hemodynamics:
+    - HR:   8.0 bpm
+    - BP:   12.0/80.0 mmHg
+    - Temp: 37.0 °C
+  Respiratory:
+    - SPO2: 98.0%
+    - PaO2: 95.0
+    - FiO2: 21.0
+  Renal:
+    - Urine Output: 50.0 ml/hr
+  Labs:
+    - Platelets:  25.0
+    - Bilirubin:  10.0
+    - Creatinine: 20.0
+  Neurological (GCS):
+    - Eye:    3
+    - Verbal: 3
+    - Motor:  2
+    - TOTAL:  8/15
+
+--- [4] AI PREDICTION ---
+  [BASELINE] Mortality Risk: 61.91087296532235%
+  [BASELINE] Risk Level:     High
+  [BASELINE] SOFA Score:     14.0
+
+  [CURRENT]  Mortality Risk: 0.2292139232158661%
+  [CURRENT]  Risk Level:     Low
+  [CURRENT]  SOFA Score:     14.0
+
+--- [5] HOURLY VITALS HISTORY ---
+  Update #1 [2025-12-10T23:48:23.717123]:
+    HR: 8 | BP: 12/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E3 V3 M2
+  Update #2 [2025-12-10T18:48:38.908Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #3 [2025-12-10T18:48:56.240Z]:
+    HR: 80 | BP: 125/88 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #4 [2025-12-10T18:49:07.208Z]:
+    HR: 80 | BP: 132/88 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M2
+
+######################################################################
+PATIENT: abcd (ID: 004)
+######################################################################
+
+--- [1] BASIC DEMOGRAPHICS ---
+  Created: 2025-12-10T23:55:19.784167
+  Age:     45
+  Gender:  Male
+  Status:  Active
+
+--- [2] BURN INJURY ---
+  TBSA:       40.5%
+  Depth:      Full Thickness
+  Inhalation: No
+
+--- [3] INITIAL ASSESSMENT (Baseline) ---
+  Hemodynamics:
+    - HR:   80.0 bpm
+    - BP:   120.0/80.0 mmHg
+    - Temp: 37.0 °C
+  Respiratory:
+    - SPO2: 98.0%
+    - PaO2: 95.0
+    - FiO2: 21.0
+  Renal:
+    - Urine Output: 50.0 ml/hr
+  Labs:
+    - Platelets:  250.0
+    - Bilirubin:  0.8
+    - Creatinine: 0.9
+  Neurological (GCS):
+    - Eye:    4
+    - Verbal: 5
+    - Motor:  6
+    - TOTAL:  15/15
+
+--- [4] AI PREDICTION ---
+  [BASELINE] Mortality Risk: 30.945713173241572%
+  [BASELINE] Risk Level:     Medium
+  [BASELINE] SOFA Score:     0.0
+
+  [CURRENT]  Mortality Risk: 0.0026593352667987347%
+  [CURRENT]  Risk Level:     Low
+  [CURRENT]  SOFA Score:     0.0
+
+--- [5] HOURLY VITALS HISTORY ---
+  Update #1 [2025-12-10T23:55:19.784137]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #2 [2025-12-10T18:55:45.912Z]:
+    HR: 8 | BP: 12/8 | SPO2: 9 | Temp: 3 | Urine: 5
+    GCS: E1 V1 M1
+  Update #3 [2025-12-10T18:56:00.876Z]:
+    HR: 8 | BP: 12/8 | SPO2: 9 | Temp: 3 | Urine: 5
+    GCS: E1 V1 M1
+  Update #4 [2025-12-10T18:56:04.211Z]:
+    HR: 8 | BP: 12/8 | SPO2: 9 | Temp: 3 | Urine: 5
+    GCS: E1 V1 M1
+
+######################################################################
+PATIENT: abcde (ID: 005)
+######################################################################
+
+--- [1] BASIC DEMOGRAPHICS ---
+  Created: 2025-12-10T23:57:22.243502
+  Age:     45
+  Gender:  Male
+  Status:  Active
+
+--- [2] BURN INJURY ---
+  TBSA:       54.0%
+  Depth:      Full Thickness
+  Inhalation: No
+
+--- [3] INITIAL ASSESSMENT (Baseline) ---
+  Hemodynamics:
+    - HR:   80.0 bpm
+    - BP:   120.0/80.0 mmHg
+    - Temp: 37.0 °C
+  Respiratory:
+    - SPO2: 98.0%
+    - PaO2: 95.0
+    - FiO2: 21.0
+  Renal:
+    - Urine Output: 50.0 ml/hr
+  Labs:
+    - Platelets:  250.0
+    - Bilirubin:  0.8
+    - Creatinine: 0.9
+  Neurological (GCS):
+    - Eye:    4
+    - Verbal: 5
+    - Motor:  6
+    - TOTAL:  15/15
+
+--- [4] AI PREDICTION ---
+  [BASELINE] Mortality Risk: 31.861053460041905%
+  [BASELINE] Risk Level:     Medium
+  [BASELINE] SOFA Score:     0.0
+
+  [CURRENT]  Mortality Risk: 24.243064880371094%
+  [CURRENT]  Risk Level:     Medium
+  [CURRENT]  SOFA Score:     0.0
+
+--- [5] HOURLY VITALS HISTORY ---
+  Update #1 [2025-12-10T23:57:22.243477]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #2 [2025-12-10T18:57:46.403Z]:
+    HR: 8 | BP: 12/8 | SPO2: 92 | Temp: 3 | Urine: 44
+    GCS: E1 V1 M1
+  Update #3 [2025-12-10T18:58:02.462Z]:
+    HR: 8 | BP: 12/8 | SPO2: 92 | Temp: 3 | Urine: 44
+    GCS: E1 V1 M1
+  Update #4 [2025-12-10T18:58:05.017Z]:
+    HR: 8 | BP: 12/8 | SPO2: 92 | Temp: 3 | Urine: 44
+    GCS: E1 V1 M1
+
+######################################################################
+PATIENT: abcd (ID: 007)
+######################################################################
+
+--- [1] BASIC DEMOGRAPHICS ---
+  Created: 2025-12-11T00:06:38.409814
+  Age:     45
+  Gender:  Male
+  Status:  Active
+
+--- [2] BURN INJURY ---
+  TBSA:       45.0%
+  Depth:      Full Thickness
+  Inhalation: No
+
+--- [3] INITIAL ASSESSMENT (Baseline) ---
+  Hemodynamics:
+    - HR:   80.0 bpm
+    - BP:   120.0/80.0 mmHg
+    - Temp: 37.0 °C
+  Respiratory:
+    - SPO2: 98.0%
+    - PaO2: 95.0
+    - FiO2: 21.0
+  Renal:
+    - Urine Output: 50.0 ml/hr
+  Labs:
+    - Platelets:  250.0
+    - Bilirubin:  0.8
+    - Creatinine: 0.9
+  Neurological (GCS):
+    - Eye:    3
+    - Verbal: 3
+    - Motor:  3
+    - TOTAL:  9/15
+
+--- [4] AI PREDICTION ---
+  [BASELINE] Mortality Risk: 34.1967766280684%
+  [BASELINE] Risk Level:     Medium
+  [BASELINE] SOFA Score:     3.0
+
+  [CURRENT]  Mortality Risk: 103.79275512695312%
+  [CURRENT]  Risk Level:     High
+  [CURRENT]  SOFA Score:     3.0
+
+--- [5] HOURLY VITALS HISTORY ---
+  Update #1 [2025-12-11T00:06:38.409788]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E3 V3 M3
+  Update #2 [2025-12-10T19:07:09.702Z]:
+    HR: 8 | BP: 12/80 | SPO2: 88 | Temp: 35 | Urine: 50
+    GCS: E1 V3 M2
+  Update #3 [2025-12-10T19:07:21.384Z]:
+    HR: 8 | BP: 12/80 | SPO2: 88 | Temp: 35 | Urine: 50
+    GCS: E1 V3 M2
+  Update #4 [2025-12-10T19:07:24.021Z]:
+    HR: 8 | BP: 12/80 | SPO2: 88 | Temp: 35 | Urine: 50
+    GCS: E1 V3 M2
+  Update #5 [2025-12-10T19:07:28.095Z]:
+    HR: 8 | BP: 12/80 | SPO2: 88 | Temp: 35 | Urine: 50
+    GCS: E1 V3 M2
+  Update #6 [2025-12-10T19:07:35.519Z]:
+    HR: 8 | BP: 12/80 | SPO2: 88 | Temp: 35 | Urine: 50
+    GCS: E1 V3 M2
+
+######################################################################
+PATIENT: abd (ID: 008)
+######################################################################
+
+--- [1] BASIC DEMOGRAPHICS ---
+  Created: 2025-12-11T00:11:29.437610
+  Age:     45
+  Gender:  Male
+  Status:  Active
+
+--- [2] BURN INJURY ---
+  TBSA:       67.5%
+  Depth:      Full Thickness
+  Inhalation: No
+
+--- [3] INITIAL ASSESSMENT (Baseline) ---
+  Hemodynamics:
+    - HR:   80.0 bpm
+    - BP:   120.0/80.0 mmHg
+    - Temp: 37.0 °C
+  Respiratory:
+    - SPO2: 98.0%
+    - PaO2: 95.0
+    - FiO2: 21.0
+  Renal:
+    - Urine Output: 50.0 ml/hr
+  Labs:
+    - Platelets:  250.0
+    - Bilirubin:  0.8
+    - Creatinine: 0.9
+  Neurological (GCS):
+    - Eye:    2
+    - Verbal: 2
+    - Motor:  3
+    - TOTAL:  7/15
+
+--- [4] AI PREDICTION ---
+  [BASELINE] Mortality Risk: 80.98281627589125%
+  [BASELINE] Risk Level:     High
+  [BASELINE] SOFA Score:     3.0
+
+  [CURRENT]  Mortality Risk: None%
+  [CURRENT]  Risk Level:     Insufficient Monitoring History
+  [CURRENT]  SOFA Score:     3.0
+
+--- [5] HOURLY VITALS HISTORY ---
+  Update #1 [2025-12-11T00:11:29.437598]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E2 V2 M3
+  Update #2 [2025-12-10T19:11:54.764Z]:
+    HR: 80 | BP: 113/73 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E1 V1 M2
+  Update #3 [2025-12-10T19:12:08.712Z]:
+    HR: 80 | BP: 113/73 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E1 V1 M2
+  Update #4 [2025-12-10T19:12:11.558Z]:
+    HR: 80 | BP: 113/73 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E1 V1 M2
+  Update #5 [2025-12-10T19:12:15.901Z]:
+    HR: 80 | BP: 113/73 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E1 V1 M2
+  Update #6 [2025-12-10T19:12:21.176Z]:
+    HR: 80 | BP: 113/73 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E1 V1 M2
+
+######################################################################
+PATIENT: abcd (ID: 009)
+######################################################################
+
+--- [1] BASIC DEMOGRAPHICS ---
+  Created: 2025-12-11T00:18:17.117282
+  Age:     45
+  Gender:  Male
+  Status:  Active
+
+--- [2] BURN INJURY ---
+  TBSA:       76.5%
+  Depth:      Partial Thickness
+  Inhalation: No
+
+--- [3] INITIAL ASSESSMENT (Baseline) ---
+  Hemodynamics:
+    - HR:   80.0 bpm
+    - BP:   120.0/80.0 mmHg
+    - Temp: 37.0 °C
+  Respiratory:
+    - SPO2: 98.0%
+    - PaO2: 95.0
+    - FiO2: 21.0
+  Renal:
+    - Urine Output: 50.0 ml/hr
+  Labs:
+    - Platelets:  250.0
+    - Bilirubin:  0.8
+    - Creatinine: 0.9
+  Neurological (GCS):
+    - Eye:    2
+    - Verbal: 3
+    - Motor:  3
+    - TOTAL:  8/15
+
+--- [4] AI PREDICTION ---
+  [BASELINE] Mortality Risk: 47.682969478354536%
+  [BASELINE] Risk Level:     Medium
+  [BASELINE] SOFA Score:     3.0
+
+  [CURRENT]  Mortality Risk: 112.38007354736328%
+  [CURRENT]  Risk Level:     High
+  [CURRENT]  SOFA Score:     3.0
+
+--- [5] HOURLY VITALS HISTORY ---
+  Update #1 [2025-12-11T00:18:17.117261]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E2 V3 M3
+  Update #2 [2025-12-10T19:18:27.645Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #3 [2025-12-10T19:18:43.551Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #4 [2025-12-10T19:19:10.557Z]:
+    HR: 8 | BP: 12/8 | SPO2: 9 | Temp: 3 | Urine: 5
+    GCS: E1 V1 M1
+  Update #5 [2025-12-10T19:19:15.402Z]:
+    HR: 8 | BP: 12/8 | SPO2: 9 | Temp: 3 | Urine: 5
+    GCS: E1 V1 M1
+  Update #6 [2025-12-10T19:19:18.295Z]:
+    HR: 8 | BP: 12/8 | SPO2: 9 | Temp: 3 | Urine: 5
+    GCS: E1 V1 M1
+
+######################################################################
+PATIENT: abc (ID: 010)
+######################################################################
+
+--- [1] BASIC DEMOGRAPHICS ---
+  Created: 2025-12-11T00:21:28.369698
+  Age:     45
+  Gender:  Male
+  Status:  Discharged
+
+--- [2] BURN INJURY ---
+  TBSA:       81.0%
+  Depth:      Partial Thickness
+  Inhalation: No
+
+--- [3] INITIAL ASSESSMENT (Baseline) ---
+  Hemodynamics:
+    - HR:   80.0 bpm
+    - BP:   120.0/80.0 mmHg
+    - Temp: 37.0 °C
+  Respiratory:
+    - SPO2: 98.0%
+    - PaO2: 95.0
+    - FiO2: 21.0
+  Renal:
+    - Urine Output: 50.0 ml/hr
+  Labs:
+    - Platelets:  250.0
+    - Bilirubin:  0.8
+    - Creatinine: 0.9
+  Neurological (GCS):
+    - Eye:    2
+    - Verbal: 2
+    - Motor:  1
+    - TOTAL:  5/15
+
+--- [4] AI PREDICTION ---
+  [BASELINE] Mortality Risk: 82.43828432060897%
+  [BASELINE] Risk Level:     High
+  [BASELINE] SOFA Score:     4.0
+
+  [CURRENT]  Mortality Risk: 28.867523193359375%
+  [CURRENT]  Risk Level:     Low
+  [CURRENT]  SOFA Score:     4.0
+
+--- [5] HOURLY VITALS HISTORY ---
+  Update #1 [2025-12-11T00:21:28.369671]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E2 V2 M1
+  Update #2 [2025-12-10T19:22:07.701Z]:
+    HR: 8 | BP: 12/8 | SPO2: 9 | Temp: 3 | Urine: 5
+    GCS: E1 V1 M1
+  Update #3 [2025-12-10T19:22:14.290Z]:
+    HR: 8 | BP: 12/8 | SPO2: 9 | Temp: 3 | Urine: 5
+    GCS: E1 V1 M1
+  Update #4 [2025-12-10T19:22:17.581Z]:
+    HR: 8 | BP: 12/8 | SPO2: 9 | Temp: 3 | Urine: 5
+    GCS: E1 V1 M1
+  Update #5 [2025-12-10T19:22:23.402Z]:
+    HR: 8 | BP: 12/8 | SPO2: 9 | Temp: 3 | Urine: 5
+    GCS: E1 V1 M1
+  Update #6 [2025-12-10T19:23:15.993Z]:
+    HR: 80 | BP: 120/80 | SPO2: 99 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #7 [2025-12-10T19:23:20.439Z]:
+    HR: 80 | BP: 120/80 | SPO2: 99 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #8 [2025-12-10T19:23:23.966Z]:
+    HR: 80 | BP: 120/80 | SPO2: 99 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #9 [2025-12-10T19:23:30.863Z]:
+    HR: 80 | BP: 120/80 | SPO2: 99 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #10 [2025-12-10T19:23:37.596Z]:
+    HR: 80 | BP: 120/80 | SPO2: 99 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #11 [2025-12-10T19:23:43.736Z]:
+    HR: 80 | BP: 120/80 | SPO2: 99 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #12 [2025-12-10T19:23:51.171Z]:
+    HR: 80 | BP: 120/80 | SPO2: 99 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #13 [2025-12-10T19:23:59.834Z]:
+    HR: 80 | BP: 120/80 | SPO2: 99 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #14 [2025-12-10T19:24:06.153Z]:
+    HR: 80 | BP: 120/80 | SPO2: 99 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #15 [2025-12-10T19:24:20.793Z]:
+    HR: 80 | BP: 120/80 | SPO2: 99 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #16 [2025-12-10T19:25:23.374Z]:
+    HR: 80 | BP: 120/80 | SPO2: 99 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #17 [2025-12-10T19:25:32.567Z]:
+    HR: 80 | BP: 120/80 | SPO2: 99 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #18 [2025-12-10T19:25:38.508Z]:
+    HR: 80 | BP: 120/80 | SPO2: 99 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #19 [2025-12-10T19:25:47.368Z]:
+    HR: 80 | BP: 120/80 | SPO2: 99 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #20 [2025-12-10T19:26:27.506Z]:
+    HR: 8 | BP: 12/8 | SPO2: 8 | Temp: 3 | Urine: 5
+    GCS: E1 V1 M1
+  Update #21 [2025-12-10T19:26:33.563Z]:
+    HR: 8 | BP: 12/8 | SPO2: 8 | Temp: 3 | Urine: 5
+    GCS: E1 V1 M1
+  Update #22 [2025-12-10T19:26:38.268Z]:
+    HR: 8 | BP: 12/8 | SPO2: 8 | Temp: 3 | Urine: 5
+    GCS: E1 V1 M1
+  Update #23 [2025-12-10T19:26:43.162Z]:
+    HR: 8 | BP: 12/8 | SPO2: 8 | Temp: 3 | Urine: 5
+    GCS: E1 V1 M1
+  Update #24 [2025-12-10T19:26:48.388Z]:
+    HR: 8 | BP: 12/8 | SPO2: 8 | Temp: 3 | Urine: 5
+    GCS: E1 V1 M1
+  Update #25 [2025-12-10T19:27:05.214Z]:
+    HR: 8 | BP: 12/8 | SPO2: 8 | Temp: 3 | Urine: 5
+    GCS: E1 V1 M1
+  Update #26 [2025-12-11T06:26:37.387Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #27 [2025-12-11T06:26:40.910Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #28 [2025-12-11T06:26:48.968Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #29 [2025-12-11T06:26:54.786Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #30 [2025-12-11T06:27:00.859Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #31 [2025-12-11T06:27:06.438Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #32 [2025-12-11T06:27:13.514Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #33 [2025-12-11T06:27:24.143Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+
+######################################################################
+PATIENT: ahmad (ID: 011)
+######################################################################
+
+--- [1] BASIC DEMOGRAPHICS ---
+  Created: 2025-12-11T11:10:13.200833
+  Age:     45
+  Gender:  Male
+  Status:  Active
+
+--- [2] BURN INJURY ---
+  TBSA:       27.0%
+  Depth:      Full Thickness
+  Inhalation: No
+
+--- [3] INITIAL ASSESSMENT (Baseline) ---
+  Hemodynamics:
+    - HR:   80.0 bpm
+    - BP:   120.0/80.0 mmHg
+    - Temp: 37.0 °C
+  Respiratory:
+    - SPO2: 98.0%
+    - PaO2: 95.0
+    - FiO2: 21.0
+  Renal:
+    - Urine Output: 50.0 ml/hr
+  Labs:
+    - Platelets:  25.0
+    - Bilirubin:  0.8
+    - Creatinine: 0.9
+  Neurological (GCS):
+    - Eye:    3
+    - Verbal: 1
+    - Motor:  3
+    - TOTAL:  7/15
+
+--- [4] AI PREDICTION ---
+  [BASELINE] Mortality Risk: 18.8538246098125%
+  [BASELINE] Risk Level:     Low
+  [BASELINE] SOFA Score:     6.0
+
+  [CURRENT]  Mortality Risk: 71.6041259765625%
+  [CURRENT]  Risk Level:     High
+  [CURRENT]  SOFA Score:     6.0
+
+--- [5] HOURLY VITALS HISTORY ---
+  Update #1 [2025-12-11T11:10:13.200808]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E3 V1 M3
+  Update #2 [2025-12-11T06:10:53.500Z]:
+    HR: 80 | BP: 120/80 | SPO2: 9 | Temp: 37 | Urine: 5
+    GCS: E4 V5 M6
+  Update #3 [2025-12-11T06:11:12.120Z]:
+    HR: 80 | BP: 116/84 | SPO2: 9 | Temp: 37 | Urine: 5
+    GCS: E4 V5 M6
+  Update #4 [2025-12-11T06:11:18.247Z]:
+    HR: 80 | BP: 116/84 | SPO2: 9 | Temp: 37 | Urine: 5
+    GCS: E4 V5 M6
+  Update #5 [2025-12-11T06:12:04.724Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #6 [2025-12-11T06:12:10.799Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #7 [2025-12-11T06:12:15.026Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #8 [2025-12-11T06:12:19.714Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #9 [2025-12-11T06:12:24.392Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #10 [2025-12-11T06:12:28.694Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #11 [2025-12-11T06:12:33.135Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #12 [2025-12-11T06:12:58.655Z]:
+    HR: 8 | BP: 12/8 | SPO2: 9 | Temp: 3 | Urine: 5
+    GCS: E1 V1 M1
+  Update #13 [2025-12-11T06:13:04.721Z]:
+    HR: 8 | BP: 12/8 | SPO2: 9 | Temp: 3 | Urine: 5
+    GCS: E1 V1 M1
+  Update #14 [2025-12-11T06:13:11.497Z]:
+    HR: 8 | BP: 12/8 | SPO2: 9 | Temp: 3 | Urine: 5
+    GCS: E1 V1 M1
+  Update #15 [2025-12-11T06:13:17.447Z]:
+    HR: 8 | BP: 12/8 | SPO2: 9 | Temp: 3 | Urine: 5
+    GCS: E1 V1 M1
+  Update #16 [2025-12-11T06:13:22.263Z]:
+    HR: 8 | BP: 12/8 | SPO2: 9 | Temp: 3 | Urine: 5
+    GCS: E1 V1 M1
+  Update #17 [2025-12-11T06:13:27.997Z]:
+    HR: 8 | BP: 12/8 | SPO2: 9 | Temp: 3 | Urine: 5
+    GCS: E1 V1 M1
+
+######################################################################
+PATIENT: abcd (ID: 012)
+######################################################################
+
+--- [1] BASIC DEMOGRAPHICS ---
+  Created: 2025-12-11T11:22:40.333355
+  Age:     45
+  Gender:  Male
+  Status:  Active
+
+--- [2] BURN INJURY ---
+  TBSA:       0.0%
+  Depth:      Full Thickness
+  Inhalation: No
+
+--- [3] INITIAL ASSESSMENT (Baseline) ---
+  Hemodynamics:
+    - HR:   80.0 bpm
+    - BP:   120.0/80.0 mmHg
+    - Temp: 37.0 °C
+  Respiratory:
+    - SPO2: 98.0%
+    - PaO2: 95.0
+    - FiO2: 21.0
+  Renal:
+    - Urine Output: 50.0 ml/hr
+  Labs:
+    - Platelets:  250.0
+    - Bilirubin:  0.8
+    - Creatinine: 0.9
+  Neurological (GCS):
+    - Eye:    4
+    - Verbal: 5
+    - Motor:  6
+    - TOTAL:  15/15
+
+--- [4] AI PREDICTION ---
+  [BASELINE] Mortality Risk: 0.0%
+  [BASELINE] Risk Level:     Low
+  [BASELINE] SOFA Score:     0.0
+
+  [CURRENT]  Mortality Risk: None%
+  [CURRENT]  Risk Level:     Insufficient Monitoring History
+  [CURRENT]  SOFA Score:     0.0
+
+--- [5] HOURLY VITALS HISTORY ---
+  Update #1 [2025-12-11T11:22:40.333316]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #2 [2025-12-11T06:22:45.329Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #3 [2025-12-11T06:22:51.523Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+
+######################################################################
+PATIENT: abcd (ID: 013)
+######################################################################
+
+--- [1] BASIC DEMOGRAPHICS ---
+  Created: 2025-12-11T11:23:07.701418
+  Age:     45
+  Gender:  Male
+  Status:  Active
+
+--- [2] BURN INJURY ---
+  TBSA:       13.5%
+  Depth:      Partial Thickness
+  Inhalation: No
+
+--- [3] INITIAL ASSESSMENT (Baseline) ---
+  Hemodynamics:
+    - HR:   80.0 bpm
+    - BP:   120.0/80.0 mmHg
+    - Temp: 37.0 °C
+  Respiratory:
+    - SPO2: 98.0%
+    - PaO2: 95.0
+    - FiO2: 21.0
+  Renal:
+    - Urine Output: 50.0 ml/hr
+  Labs:
+    - Platelets:  250.0
+    - Bilirubin:  0.8
+    - Creatinine: 0.9
+  Neurological (GCS):
+    - Eye:    4
+    - Verbal: 5
+    - Motor:  6
+    - TOTAL:  15/15
+
+--- [4] AI PREDICTION ---
+  [BASELINE] Mortality Risk: 0.0%
+  [BASELINE] Risk Level:     Low
+  [BASELINE] SOFA Score:     0.0
+
+  [CURRENT]  Mortality Risk: None%
+  [CURRENT]  Risk Level:     Insufficient Monitoring History
+  [CURRENT]  SOFA Score:     0.0
+
+--- [5] HOURLY VITALS HISTORY ---
+  Update #1 [2025-12-11T11:23:07.701405]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #2 [2025-12-11T06:23:16.067Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #3 [2025-12-11T06:23:18.764Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+
+######################################################################
+PATIENT: ahmad (ID: 015)
+######################################################################
+
+--- [1] BASIC DEMOGRAPHICS ---
+  Created: 2025-12-11T11:40:07.186828
+  Age:     45
+  Gender:  Male
+  Status:  Recovered
+
+--- [2] BURN INJURY ---
+  TBSA:       45.0%
+  Depth:      Full Thickness
+  Inhalation: No
+
+--- [3] INITIAL ASSESSMENT (Baseline) ---
+  Hemodynamics:
+    - HR:   80.0 bpm
+    - BP:   120.0/80.0 mmHg
+    - Temp: 37.0 °C
+  Respiratory:
+    - SPO2: 98.0%
+    - PaO2: 95.0
+    - FiO2: 21.0
+  Renal:
+    - Urine Output: 50.0 ml/hr
+  Labs:
+    - Platelets:  25.0
+    - Bilirubin:  0.8
+    - Creatinine: 0.9
+  Neurological (GCS):
+    - Eye:    4
+    - Verbal: 5
+    - Motor:  6
+    - TOTAL:  15/15
+
+--- [4] AI PREDICTION ---
+  [BASELINE] Mortality Risk: 26.08328728414479%
+  [BASELINE] Risk Level:     Medium
+  [BASELINE] SOFA Score:     3.0
+
+  [CURRENT]  Mortality Risk: 25.138282775878906%
+  [CURRENT]  Risk Level:     Low
+  [CURRENT]  SOFA Score:     3.0
+
+--- [5] HOURLY VITALS HISTORY ---
+  Update #1 [2025-12-11T11:40:07.186813]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #2 [2025-12-11T06:40:14.680Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #3 [2025-12-11T06:40:31.355Z]:
+    HR: 72 | BP: 11/80 | SPO2: 98 | Temp: 35.8 | Urine: 50
+    GCS: E4 V5 M6
+  Update #4 [2025-12-11T06:40:36.390Z]:
+    HR: 72 | BP: 11/80 | SPO2: 98 | Temp: 35.8 | Urine: 50
+    GCS: E4 V5 M6
+  Update #5 [2025-12-11T06:40:39.168Z]:
+    HR: 72 | BP: 11/80 | SPO2: 98 | Temp: 35.8 | Urine: 50
+    GCS: E4 V5 M6
+
+######################################################################
+PATIENT: abcd (ID: 016)
+######################################################################
+
+--- [1] BASIC DEMOGRAPHICS ---
+  Created: 2025-12-11T12:55:01.414029
+  Age:     45
+  Gender:  Male
+  Status:  Active
+
+--- [2] BURN INJURY ---
+  TBSA:       27.0%
+  Depth:      Full Thickness
+  Inhalation: No
+
+--- [3] INITIAL ASSESSMENT (Baseline) ---
+  Hemodynamics:
+    - HR:   80.0 bpm
+    - BP:   120.0/80.0 mmHg
+    - Temp: 37.0 °C
+  Respiratory:
+    - SPO2: 98.0%
+    - PaO2: 95.0
+    - FiO2: 21.0
+  Renal:
+    - Urine Output: 50.0 ml/hr
+  Labs:
+    - Platelets:  250.0
+    - Bilirubin:  0.8
+    - Creatinine: 0.9
+  Neurological (GCS):
+    - Eye:    4
+    - Verbal: 5
+    - Motor:  6
+    - TOTAL:  15/15
+
+--- [4] AI PREDICTION ---
+  [BASELINE] Mortality Risk: 0.0%
+  [BASELINE] Risk Level:     Low
+  [BASELINE] SOFA Score:     0.0
+
+  [CURRENT]  Mortality Risk: None%
+  [CURRENT]  Risk Level:     Insufficient Monitoring History
+  [CURRENT]  SOFA Score:     0.0
+
+--- [5] HOURLY VITALS HISTORY ---
+  Update #1 [2025-12-11T12:55:01.414002]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #2 [2025-12-11T07:55:07.209Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+
+######################################################################
+PATIENT: abcd (ID: 017)
+######################################################################
+
+--- [1] BASIC DEMOGRAPHICS ---
+  Created: 2025-12-11T12:55:42.428588
+  Age:     45
+  Gender:  Male
+  Status:  Active
+
+--- [2] BURN INJURY ---
+  TBSA:       45.0%
+  Depth:      Full Thickness
+  Inhalation: No
+
+--- [3] INITIAL ASSESSMENT (Baseline) ---
+  Hemodynamics:
+    - HR:   80.0 bpm
+    - BP:   120.0/80.0 mmHg
+    - Temp: 37.0 °C
+  Respiratory:
+    - SPO2: 98.0%
+    - PaO2: 95.0
+    - FiO2: 21.0
+  Renal:
+    - Urine Output: 50.0 ml/hr
+  Labs:
+    - Platelets:  250.0
+    - Bilirubin:  0.8
+    - Creatinine: 0.9
+  Neurological (GCS):
+    - Eye:    2
+    - Verbal: 1
+    - Motor:  2
+    - TOTAL:  5/15
+
+--- [4] AI PREDICTION ---
+  [BASELINE] Mortality Risk: 58.402619794027544%
+  [BASELINE] Risk Level:     Medium
+  [BASELINE] SOFA Score:     4.0
+
+  [CURRENT]  Mortality Risk: 75.03215026855469%
+  [CURRENT]  Risk Level:     High
+  [CURRENT]  SOFA Score:     4.0
+
+--- [5] HOURLY VITALS HISTORY ---
+  Update #1 [2025-12-11T12:55:42.428562]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E2 V1 M2
+  Update #2 [2025-12-11T07:55:47.135Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #3 [2025-12-11T07:55:49.543Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #4 [2025-12-11T07:55:54.253Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #5 [2025-12-11T07:56:00.234Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #6 [2025-12-11T07:56:05.263Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #7 [2025-12-11T07:56:08.574Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #8 [2025-12-11T07:56:10.787Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #9 [2025-12-11T07:56:17.290Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #10 [2025-12-11T07:56:20.617Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #11 [2025-12-11T07:56:25.513Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #12 [2025-12-11T07:56:31.130Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #13 [2025-12-11T07:56:35.598Z]:
+    HR: 80 | BP: 120/80 | SPO2: 98 | Temp: 37 | Urine: 50
+    GCS: E4 V5 M6
+  Update #14 [2025-12-11T07:57:03.617Z]:
+    HR: 8 | BP: 1/8 | SPO2: 9 | Temp: 3 | Urine: 5
+    GCS: E1 V1 M2
+  Update #15 [2025-12-11T07:57:09.327Z]:
+    HR: 8 | BP: 1/8 | SPO2: 9 | Temp: 3 | Urine: 5
+    GCS: E1 V1 M2
+  Update #16 [2025-12-11T07:57:13.412Z]:
+    HR: 8 | BP: 1/8 | SPO2: 9 | Temp: 3 | Urine: 5
+    GCS: E1 V1 M2
+  Update #17 [2025-12-11T07:57:19.510Z]:
+    HR: 8 | BP: 1/8 | SPO2: 9 | Temp: 3 | Urine: 5
+    GCS: E1 V1 M2
+  Update #18 [2025-12-11T07:57:21.923Z]:
+    HR: 8 | BP: 1/8 | SPO2: 9 | Temp: 3 | Urine: 5
+    GCS: E1 V1 M2
+  Update #19 [2025-12-11T07:57:23.841Z]:
+    HR: 8 | BP: 1/8 | SPO2: 9 | Temp: 3 | Urine: 5
+    GCS: E1 V1 M2
+
+######################################################################
+PATIENT: Ahmad (ID: 018)
+######################################################################
+
+--- [1] BASIC DEMOGRAPHICS ---
+  Created: 2025-12-11T20:21:35.906176
+  Age:     50
+  Gender:  Male
+  Status:  Deceased
+
+--- [2] BURN INJURY ---
+  TBSA:       58.5%
+  Depth:      Full Thickness
+  Inhalation: Yes
+
+--- [3] INITIAL ASSESSMENT (Baseline) ---
+  Hemodynamics:
+    - HR:   85.0 bpm
+    - BP:   114.0/85.0 mmHg
+    - Temp: 38.0 °C
+  Respiratory:
+    - SPO2: 98.0%
+    - PaO2: 95.0
+    - FiO2: 21.0
+  Renal:
+    - Urine Output: 50.0 ml/hr
+  Labs:
+    - Platelets:  200.0
+    - Bilirubin:  0.8
+    - Creatinine: 0.9
+  Neurological (GCS):
+    - Eye:    4
+    - Verbal: 2
+    - Motor:  3
+    - TOTAL:  9/15
+
+--- [4] AI PREDICTION ---
+  [BASELINE] Mortality Risk: 60.86847500784073%
+  [BASELINE] Risk Level:     High
+  [BASELINE] SOFA Score:     3.0
+
+  [CURRENT]  Mortality Risk: 52.02827835083008%
+  [CURRENT]  Risk Level:     Medium
+  [CURRENT]  SOFA Score:     3.0
+
+--- [5] HOURLY VITALS HISTORY ---
+  Update #1 [2025-12-11T20:21:35.906156]:
+    HR: 85 | BP: 114/85 | SPO2: 98 | Temp: 38 | Urine: 50
+    GCS: E4 V2 M3
+  Update #2 [2025-12-11T15:23:47.877Z]:
+    HR: 70 | BP: 120/80 | SPO2: 98 | Temp: 36.2 | Urine: 50
+    GCS: E4 V5 M6
+  Update #3 [2025-12-11T15:24:04.204Z]:
+    HR: 70 | BP: 120/80 | SPO2: 98 | Temp: 36.2 | Urine: 50
+    GCS: E4 V5 M6
+  Update #4 [2025-12-11T15:24:09.693Z]:
+    HR: 70 | BP: 120/80 | SPO2: 98 | Temp: 36.2 | Urine: 50
+    GCS: E4 V5 M6
+  Update #5 [2025-12-11T15:24:14.747Z]:
+    HR: 70 | BP: 120/80 | SPO2: 98 | Temp: 36.2 | Urine: 50
+    GCS: E4 V5 M6
+  Update #6 [2025-12-11T15:25:03.964Z]:
+    HR: 7 | BP: 12/8 | SPO2: 9 | Temp: 10 | Urine: 50
+    GCS: E1 V1 M1
+  Update #7 [2025-12-11T15:25:11.708Z]:
+    HR: 7 | BP: 12/8 | SPO2: 9 | Temp: 10 | Urine: 50
+    GCS: E1 V1 M1
+  Update #8 [2025-12-11T15:25:14.965Z]:
+    HR: 7 | BP: 12/8 | SPO2: 9 | Temp: 10 | Urine: 50
+    GCS: E1 V1 M1
+  Update #9 [2025-12-11T15:25:17.771Z]:
+    HR: 7 | BP: 12/8 | SPO2: 9 | Temp: 10 | Urine: 50
+    GCS: E1 V1 M1
+  Update #10 [2025-12-11T15:25:21.057Z]:
+    HR: 7 | BP: 12/8 | SPO2: 9 | Temp: 10 | Urine: 50
+    GCS: E1 V1 M1
+
+######################################################################
+PATIENT: abcd (ID: 019)
+######################################################################
+
+--- [1] BASIC DEMOGRAPHICS ---
+  Created: 2025-12-12T07:52:11.908770
+  Age:     45
+  Gender:  Male
+  Status:  Active
+
+--- [2] BURN INJURY ---
+  TBSA:       45.0%
+  Depth:      Full Thickness
+  Inhalation: No
+
+--- [3] INITIAL ASSESSMENT (Baseline) ---
+  Hemodynamics:
+    - HR:   80.0 bpm
+    - BP:   120.0/80.0 mmHg
+    - Temp: 37.0 °C
+  Respiratory:
+    - SPO2: 98.0%
+    - PaO2: 95.0
+    - FiO2: 21.0
+  Renal:
+    - Urine Output: 50.0 ml/hr
+  Labs:
+    - Platelets:  25.0
+    - Bilirubin:  0.8
+    - Creatinine: 0.9
+  Neurological (GCS):
+    - Eye:    4
+    - Verbal: 5
+    - Motor:  6
+    - TOTAL:  15/15
+
+--- [4] AI PREDICTION ---
+  [BASELINE] Mortality Risk: 26.08328728414479%
+  [BASELINE] Risk Level:     Medium
+  [BASELINE] SOFA Score:     3.0
+
+  [CURRENT]  Mortality Risk: None%
+  [CURRENT]  Risk Level:     None
+  [CURRENT]  SOFA Score:     None
+
+--- [5] HOURLY VITALS HISTORY ---
+  Update #1 [2025-12-12T07:52:11.908750]:
+    HR: 80.0 | BP: 120.0/80.0 | SPO2: 98.0 | Temp: 37.0 | Urine: 50.0
+    GCS: E4 V5 M6
+
+######################################################################
+PATIENT: ahamd (ID: 020)
+######################################################################
+
+--- [1] BASIC DEMOGRAPHICS ---
+  Created: 2025-12-12T07:53:03.382512
+  Age:     45
+  Gender:  Male
+  Status:  Active
+
+--- [2] BURN INJURY ---
+  TBSA:       54.0%
+  Depth:      Full Thickness
+  Inhalation: No
+
+--- [3] INITIAL ASSESSMENT (Baseline) ---
+  Hemodynamics:
+    - HR:   80.0 bpm
+    - BP:   120.0/80.0 mmHg
+    - Temp: 37.0 °C
+  Respiratory:
+    - SPO2: 95.0%
+    - PaO2: 95.0
+    - FiO2: 21.0
+  Renal:
+    - Urine Output: 50.0 ml/hr
+  Labs:
+    - Platelets:  25.0
+    - Bilirubin:  0.8
+    - Creatinine: 9.0
+  Neurological (GCS):
+    - Eye:    2
+    - Verbal: 3
+    - Motor:  3
+    - TOTAL:  8/15
+
+--- [4] AI PREDICTION ---
+  [BASELINE] Mortality Risk: 65.36669426190427%
+  [BASELINE] Risk Level:     High
+  [BASELINE] SOFA Score:     10.0
+
+  [CURRENT]  Mortality Risk: None%
+  [CURRENT]  Risk Level:     None
+  [CURRENT]  SOFA Score:     None
+
+--- [5] HOURLY VITALS HISTORY ---
+  Update #1 [2025-12-12T07:53:03.382489]:
+    HR: 80.0 | BP: 120.0/80.0 | SPO2: 95.0 | Temp: 37.0 | Urine: 50.0
+    GCS: E2 V3 M3
+
+######################################################################
+PATIENT: haseeb (ID: 021)
+######################################################################
+
+--- [1] BASIC DEMOGRAPHICS ---
+  Created: 2025-12-12T08:00:49.032195
+  Age:     45
+  Gender:  Male
+  Status:  Active
+
+--- [2] BURN INJURY ---
+  TBSA:       0.0%
+  Depth:      Partial Thickness
+  Inhalation: No
+
+--- [3] INITIAL ASSESSMENT (Baseline) ---
+  Hemodynamics:
+    - HR:   80.0 bpm
+    - BP:   120.0/80.0 mmHg
+    - Temp: 37.0 °C
+  Respiratory:
+    - SPO2: 98.0%
+    - PaO2: 95.0
+    - FiO2: 21.0
+  Renal:
+    - Urine Output: 50.0 ml/hr
+  Labs:
+    - Platelets:  250.0
+    - Bilirubin:  0.8
+    - Creatinine: 0.9
+  Neurological (GCS):
+    - Eye:    4
+    - Verbal: 5
+    - Motor:  6
+    - TOTAL:  15/15
+
+--- [4] AI PREDICTION ---
+  [BASELINE] Mortality Risk: 0.0%
+  [BASELINE] Risk Level:     Low
+  [BASELINE] SOFA Score:     0.0
+
+  [CURRENT]  Mortality Risk: None%
+  [CURRENT]  Risk Level:     None
+  [CURRENT]  SOFA Score:     None
+
+--- [5] HOURLY VITALS HISTORY ---
+  Update #1 [2025-12-12T08:00:49.032168]:
+    HR: 80.0 | BP: 120.0/80.0 | SPO2: 98.0 | Temp: 37.0 | Urine: 50.0
+    GCS: E4 V5 M6
