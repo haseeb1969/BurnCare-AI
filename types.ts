@@ -33,6 +33,7 @@ export interface PatientInput {
   comorbidities: string;
 
   burnedRegions: string[];
+  bodyMapImage?: string; // Base64 image data of the burn map
 
   // Hemodynamics
   heartRate: number;

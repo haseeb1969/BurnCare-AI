@@ -60,11 +60,17 @@ def get_model():
             _model = load_model(MODEL_PATH)
 
             # --- Compute dynamic SCALE_FACTOR ---
-            dummy_sequence = np.array([[0.5]*len(FEATURE_COLS)]*SEQ_LEN)
-            dummy_batch = np.stack([dummy_sequence]*100, axis=0)
-            preds = _model.predict(dummy_batch).flatten()
-            SCALE_FACTOR = 100.0 / np.percentile(preds, 95)
-            print(f"[INFO] Dynamic SCALE_FACTOR set to {SCALE_FACTOR:.2f}")
+            # Calibrate against a "Critical" patient (low BP, low SpO2, low GCS, high SOFA)
+            # This ensures the scale factor isn't overly aggressive for normal vitals.
+            critical_vitals = [0.1, 0.1, 0.8, 0.8, 0.1, 0.0, 0.0, 0.0, 0.1, 0.9, 1.0] 
+            dummy_sequence = np.array([critical_vitals]*SEQ_LEN)
+            dummy_batch = np.stack([dummy_sequence]*10, axis=0)
+            preds = _model.predict(dummy_batch, verbose=0).flatten()
+            
+            # Calibrate so that a critical state is ~90% mortality raw
+            max_pred = np.max(preds) if np.max(preds) > 0 else 0.01
+            SCALE_FACTOR = 100.0 / max_pred
+            print(f"[INFO] Dynamic SCALE_FACTOR recalibrated to {SCALE_FACTOR:.2f} based on critical profile")
         else:
             print(f"ERROR: Model not found at {MODEL_PATH}")
     return _model
@@ -77,6 +83,34 @@ def get_alert_status(vitals):
     if vitals.get('urineOutput', 50) < 30: alerts = 1
     return alerts
 
+def calculate_partial_sofa(step, baseline_sofa):
+    """
+    Recalculates a partial SOFA score based on hourly vitals.
+    Keeps lab-based SOFA components from baseline.
+    """
+    # Start with baseline (which includes labs like platelets, bilirubin, creatinine)
+    # We subtract the CNS and CV components from baseline and add current ones
+    # But since we don't know the baseline components separately, we just add 
+    # the current CV/CNS score to the non-vitals part of baseline.
+    # For simplicity, we'll just adjust the baseline sofa based on current vitals.
+    
+    score_adj = 0
+    gcs = step.get('gcsEye', 4) + step.get('gcsVerbal', 5) + step.get('gcsMotor', 6)
+    if gcs < 6: score_adj = 4
+    elif gcs <= 9: score_adj = 3
+    elif gcs <= 12: score_adj = 2
+    elif gcs <= 14: score_adj = 1
+    
+    sys = step.get('systolicBP', 120)
+    dia = step.get('diastolicBP', 80)
+    map_val = (sys + 2 * dia) / 3
+    if map_val < 70: score_adj += 1
+    
+    # We return the higher of the baseline or the adjusted score to stay conservative
+    # or just use the baseline if vitals are normal.
+    # Actually, let's just use the current vitals-based score if baseline is 0
+    return max(float(baseline_sofa), float(score_adj))
+
 def prepare_sequence(patient):
     base_vitals = {
         "systolicBP": patient.systolicBP,
@@ -87,18 +121,12 @@ def prepare_sequence(patient):
         "gcsEye": patient.gcsEye,
         "gcsVerbal": patient.gcsVerbal,
         "gcsMotor": patient.gcsMotor,
-        "urineOutput": patient.urineOutput,
-        "pao2": patient.pao2,
-        "fio2": patient.fio2,
-        "platelets": patient.platelets,
-        "bilirubin": patient.bilirubin,
-        "creatinine": patient.creatinine
+        "urineOutput": patient.urineOutput
     }
 
     history_list = []
     if hasattr(patient, "hourlyVitals") and patient.hourlyVitals:
-        for h in patient.hourlyVitals:
-            history_list.append(h)
+        history_list = list(patient.hourlyVitals)
 
     full_sequence = []
     for h in history_list:
@@ -112,9 +140,11 @@ def prepare_sequence(patient):
     while len(full_sequence) < SEQ_LEN:
         full_sequence.insert(0, full_sequence[0])
 
+    baseline_sofa = getattr(patient, 'sofaScore', 0.0) or 0.0
     matrix = np.zeros((SEQ_LEN, len(FEATURE_COLS)))
     for i, step in enumerate(full_sequence):
-        sofa = getattr(patient, 'sofaScore', 0.0) or 0.0
+        # Calculate sofa for this specific hour
+        current_sofa = calculate_partial_sofa(step, baseline_sofa)
         alert = get_alert_status(step)
         row = [
             step.get('systolicBP', 120.0),
@@ -126,7 +156,7 @@ def prepare_sequence(patient):
             step.get('gcsVerbal', 5.0),
             step.get('gcsMotor', 6.0),
             step.get('urineOutput', 50.0),
-            float(sofa),
+            float(current_sofa),
             float(alert)
         ]
         matrix[i] = row
@@ -147,7 +177,7 @@ def predict_mortality(patient):
     input_tensor = scaled_matrix.reshape(1, SEQ_LEN, len(FEATURE_COLS))
 
     try:
-        prob = model.predict(input_tensor)[0][0]
+        prob = model.predict(input_tensor, verbose=0)[0][0]
     except Exception as e:
         print(f"Prediction Error: {e}")
         import traceback
@@ -158,8 +188,9 @@ def predict_mortality(patient):
     if SCALE_FACTOR is None:
         SCALE_FACTOR = 1.0
 
+    # Ensure we use standard Python float for database compatibility
     mortality_percent = float(prob * SCALE_FACTOR)
-    mortality_percent = np.clip(mortality_percent, 0.0, 100.0)
+    mortality_percent = float(np.clip(mortality_percent, 0.0, 100.0))
 
     if mortality_percent < 20:
         risk = "Low"
@@ -170,3 +201,6 @@ def predict_mortality(patient):
 
     current_sofa = getattr(patient, 'sofaScore', 0.0) or 0.0
     return mortality_percent, risk, float(current_sofa)
+
+# Pre-load model on startup
+get_model()

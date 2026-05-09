@@ -242,10 +242,18 @@ export const PatientDetail: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="border border-gray-100 rounded-lg p-2 flex justify-center bg-gray-50/50">
-                  <div className="scale-75 origin-top -mb-20">
-                    <BodyMap selectedRegions={patient.burnedRegions || []} readOnly={true} />
-                  </div>
+                <div className="border border-gray-200 rounded-lg overflow-hidden flex justify-center bg-white shadow-inner min-h-[200px] items-center">
+                  {patient.bodyMapImage && patient.bodyMapImage.length > 100 ? (
+                    <img 
+                      src={patient.bodyMapImage} 
+                      alt="Patient Burn Map" 
+                      className="w-full h-auto object-contain max-h-[400px]" 
+                    />
+                  ) : (
+                    <div className="scale-75 origin-top -mb-20">
+                      <BodyMap selectedRegions={patient.burnedRegions || []} readOnly={true} />
+                    </div>
+                  )}
                 </div>
 
                 <div>

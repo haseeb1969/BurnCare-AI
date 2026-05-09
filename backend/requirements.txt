@@ -9,3 +9,7 @@ pandas
 scikit-learn
 joblib
 numpy
+lightgbm
+psycopg2-binary
+passlib[bcrypt]
+python-jose[cryptography]

@@ -2,9 +2,12 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { apiService } from '../services/apiService';
 import { PatientRecord } from '../types';
-import { User, Calendar, AlertCircle, Search, Filter, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
+import { User, Calendar, AlertCircle, Search, Filter, ArrowUp, ArrowDown, ArrowUpDown, Trash2, AlertTriangle, X } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export const PatientList: React.FC = () => {
+  const [confirmDeletePatient, setConfirmDeletePatient] = useState<PatientRecord | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [patients, setPatients] = useState<PatientRecord[]>([]);
   const [filteredPatients, setFilteredPatients] = useState<PatientRecord[]>([]);
 
@@ -124,6 +127,119 @@ export const PatientList: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+
+      {/* Delete Confirmation Modal */}
+      {confirmDeletePatient && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          onClick={(e) => { if (e.target === e.currentTarget) setConfirmDeletePatient(null); }}
+        >
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" />
+
+          {/* Dialog */}
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden animate-[fadeInUp_0.2s_ease-out]">
+            {/* Red top bar */}
+            <div className="h-1.5 bg-gradient-to-r from-red-500 to-red-700" />
+
+            <div className="p-6">
+              {/* Header */}
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex-shrink-0 w-11 h-11 rounded-full bg-red-100 flex items-center justify-center">
+                    <Trash2 className="w-5 h-5 text-red-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">Delete Patient Record</h3>
+                    <p className="text-xs text-gray-500">This action cannot be undone</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setConfirmDeletePatient(null)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors rounded-full p-1 hover:bg-gray-100"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Warning body */}
+              <div className="bg-red-50 border border-red-100 rounded-xl p-4 mb-6">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0" />
+                  <span className="text-sm font-medium text-red-700">Warning: Permanent deletion</span>
+                </div>
+                <p className="text-sm text-red-600">
+                  You are about to permanently delete the record for{' '}
+                  <span className="font-bold">{confirmDeletePatient.name}</span>
+                  {' '}(#{confirmDeletePatient.id}). All clinical data, vitals history,
+                  and burn maps will be removed from the system.
+                </p>
+              </div>
+
+              {/* Patient summary pill */}
+              <div className="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 mb-6">
+                <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+                  <User className="w-4 h-4 text-gray-500" />
+                </div>
+                <div>
+                  <div className="font-semibold text-gray-900 text-sm">{confirmDeletePatient.name}</div>
+                  <div className="text-xs text-gray-500">{confirmDeletePatient.age} yrs · {confirmDeletePatient.gender} · TBSA {confirmDeletePatient.tbsa}%</div>
+                </div>
+                <div className="ml-auto">
+                  <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${
+                    confirmDeletePatient.riskLevel === 'Critical' ? 'bg-red-100 text-red-800' :
+                    confirmDeletePatient.riskLevel === 'High' ? 'bg-orange-100 text-orange-800' :
+                    confirmDeletePatient.riskLevel === 'Moderate' ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-green-100 text-green-800'
+                  }`}>{confirmDeletePatient.riskLevel}</span>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setConfirmDeletePatient(null)}
+                  disabled={deleteLoading}
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={async () => {
+                    setDeleteLoading(true);
+                    const toastId = toast.loading('Deleting patient record...');
+                    try {
+                      await apiService.deletePatient(confirmDeletePatient.id);
+                      setPatients(prev => prev.filter(p => p.id !== confirmDeletePatient.id));
+                      setFilteredPatients(prev => prev.filter(p => p.id !== confirmDeletePatient.id));
+                      toast.success('Patient record deleted', { id: toastId });
+                      setConfirmDeletePatient(null);
+                    } catch (e: any) {
+                      console.error('Delete error:', e?.response?.data || e);
+                      toast.error(e?.response?.data?.detail || 'Failed to delete. Check permissions.', { id: toastId });
+                    } finally {
+                      setDeleteLoading(false);
+                    }
+                  }}
+                  disabled={deleteLoading}
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-red-600 text-sm font-semibold text-white hover:bg-red-700 transition-colors disabled:opacity-75 flex items-center justify-center gap-2"
+                >
+                  {deleteLoading ? (
+                    <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                    </svg>
+                  ) : (
+                    <Trash2 className="w-4 h-4" />
+                  )}
+                  {deleteLoading ? 'Deleting...' : 'Yes, Delete'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
           <h1 className="text-2xl font-semibold text-gray-900">Patient Registry</h1>
@@ -293,21 +409,12 @@ export const PatientList: React.FC = () => {
                             View
                           </Link>
                           <button
-                            onClick={async () => {
-                              if (window.confirm('Are you sure you want to delete this record?')) {
-                                try {
-                                  await apiService.deletePatient(patient.id);
-                                  setPatients(prev => prev.filter(p => p.id !== patient.id));
-                                  setFilteredPatients(prev => prev.filter(p => p.id !== patient.id));
-                                } catch (e) {
-                                  alert('Failed to delete record');
-                                }
-                              }
-                            }}
-                            className="inline-flex items-center rounded-md bg-red-50 px-3 py-2 text-sm font-medium text-red-600 shadow-sm hover:bg-red-100 border border-red-200"
-                          >
-                            Delete
-                          </button>
+                              onClick={() => setConfirmDeletePatient(patient)}
+                              className="inline-flex items-center gap-1.5 rounded-md bg-red-50 px-3 py-2 text-sm font-medium text-red-600 shadow-sm hover:bg-red-100 border border-red-200 transition-colors"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              Delete
+                            </button>
                         </div>
                       </td>
                     </tr>

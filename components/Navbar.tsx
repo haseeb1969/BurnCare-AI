@@ -1,9 +1,11 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Activity, LayoutList, PlusCircle, Settings, HelpCircle } from 'lucide-react';
+import { Activity, LayoutList, PlusCircle, ShieldCheck, LogOut, User } from 'lucide-react';
+import { useAuth } from '../services/AuthContext';
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
+  const { user, logout } = useAuth();
 
   const isActive = (path: string) =>
     location.pathname === path
@@ -44,9 +46,39 @@ export const Navbar: React.FC = () => {
             <Activity className="w-5 h-5 mr-3" />
             Triage Dashboard
           </Link>
+
+          {user?.role === 'ADMIN' && (
+            <Link
+              to="/admin/approval"
+              className={`flex items-center px-6 py-3 text-sm font-medium transition-colors ${isActive('/admin/approval')}`}
+            >
+              <ShieldCheck className="w-5 h-5 mr-3" />
+              User Management
+            </Link>
+          )}
         </nav>
       </div>
 
+      <div className="p-4 border-t border-gray-200">
+        <div className="bg-gray-50 rounded-xl p-4 mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
+              <User size={20} />
+            </div>
+            <div className="overflow-hidden">
+              <p className="text-sm font-bold text-gray-900 truncate">{user?.full_name}</p>
+              <p className="text-xs text-gray-500 capitalize">{user?.role.toLowerCase()}</p>
+            </div>
+          </div>
+        </div>
+        <button
+          onClick={logout}
+          className="w-full flex items-center px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+        >
+          <LogOut className="w-5 h-5 mr-3" />
+          Sign Out
+        </button>
+      </div>
     </aside>
   );
 };

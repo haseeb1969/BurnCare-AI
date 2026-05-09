@@ -1,6 +1,54 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from typing import List, Optional
+from datetime import datetime
 
+# --- Hospital ---
+class HospitalBase(BaseModel):
+    name: str
+    address: Optional[str] = None
+
+class HospitalCreate(HospitalBase):
+    pass
+
+class Hospital(HospitalBase):
+    id: str
+
+    class Config:
+        orm_mode = True
+
+# --- User ---
+class UserBase(BaseModel):
+    email: EmailStr
+    full_name: str
+    role: str
+    license_number: Optional[str] = None
+    specialization: Optional[str] = None
+    phone_number: Optional[str] = None
+    hospital_id: Optional[str] = None
+
+class UserCreate(UserBase):
+    password: str
+
+class UserUpdate(BaseModel):
+    is_approved: bool
+
+class User(UserBase):
+    id: str
+    is_approved: bool
+    created_at: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+
+# --- Auth ---
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    user_id: Optional[str] = None
+
+# --- Patient ---
 class PatientBase(BaseModel):
     name: str
     age: int
@@ -10,6 +58,7 @@ class PatientBase(BaseModel):
     inhalationInjury: bool
     comorbidities: Optional[str] = None
     burnedRegions: List[str] = []
+    bodyMapImage: Optional[str] = None
 
     heartRate: float
     systolicBP: float
@@ -41,6 +90,8 @@ class PatientResponse(PatientBase, PredictionResult):
     id: str
     timestamp: str
     status: str
+    hospital_id: Optional[str] = None
+    created_by: Optional[str] = None
     hourlyVitals: List[dict] = []
     
     currentMortalityRisk: Optional[float] = None

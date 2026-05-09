@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Gender, BurnDepth, PatientInput, PatientRecord, VitalEntry } from '../types';
 import { apiService } from '../services/apiService';
-import { BodyMap, calculateTBSA } from './BodyMap';
+import { BodyMapCanvas } from './BodyMapCanvas';
 import { Loader2, AlertTriangle, Wind, Activity, Heart, Brain, TestTube, Thermometer, Droplets, HelpCircle } from 'lucide-react';
 
 export const PatientForm: React.FC = () => {
@@ -43,11 +43,7 @@ export const PatientForm: React.FC = () => {
     gcsMotor: 6
   });
 
-  // Automatically update TBSA when regions change
-  useEffect(() => {
-    const calculated = calculateTBSA(formData.burnedRegions);
-    setFormData(prev => ({ ...prev, tbsa: calculated }));
-  }, [formData.burnedRegions]);
+  // TBSA is now updated directly by the BodyMapCanvas
 
   const handleChange = (field: keyof PatientInput, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -201,9 +197,10 @@ export const PatientForm: React.FC = () => {
             <p className="text-xs text-gray-500 text-center mb-4">
               Click on body regions to mark them as burned. The calculator automatically sums the affected surface area.
             </p>
-            <BodyMap
-              selectedRegions={formData.burnedRegions}
-              onChange={handleRegionChange}
+            <BodyMapCanvas
+              value={formData.tbsa}
+              onChange={(val) => handleChange('tbsa', val)}
+              onImageChange={(img) => handleChange('bodyMapImage', img)}
             />
           </div>
         </div>
