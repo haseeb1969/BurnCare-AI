@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Default to SQLite if DATABASE_URL is not set
-SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./burncare.db")
+SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:22L7933@localhost:5432/burncareai")
 
 # PostgreSQL doesn't need check_same_thread: False, but SQLite does
 if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):

@@ -5,13 +5,17 @@ import { PatientRecord, VitalEntry } from '../types';
 import { RiskChart } from './RiskChart';
 import { BodyMap } from './BodyMap';
 import { VitalCharts } from './VitalCharts';
-import { ArrowLeft, User, Activity, Flame, CheckCircle, Clock, Plus, AlertOctagon, ShieldCheck, Save, Loader2 } from 'lucide-react';
+import { jsPDF } from 'jspdf';
+import { ArrowLeft, User, Activity, Flame, CheckCircle, Clock, Plus, AlertOctagon, ShieldCheck, Save, Loader2, Download, FileText, X } from 'lucide-react';
 
 export const PatientDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [patient, setPatient] = useState<PatientRecord | undefined>(undefined);
   const [showVitalsForm, setShowVitalsForm] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [showPdfPreview, setShowPdfPreview] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
   // Status Management State
   const [editStatus, setEditStatus] = useState<PatientRecord['status']>('Active');
@@ -56,6 +60,336 @@ export const PatientDetail: React.FC = () => {
       return () => clearTimeout(timer);
     }
   }, [updateMessage]);
+
+  useEffect(() => {
+    return () => {
+      if (pdfUrl) {
+        URL.revokeObjectURL(pdfUrl);
+      }
+    };
+  }, [pdfUrl]);
+
+  const formatDateTime = (value?: string) => {
+    if (!value) return 'N/A';
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? value : parsed.toLocaleString();
+  };
+
+  const generatePatientPdf = () => {
+    if (!patient) return null;
+
+    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 40;
+    const contentWidth = pageWidth - margin * 2;
+    const columnGap = 18;
+    const cardWidth = (contentWidth - columnGap) / 2;
+    const sectionGap = 18;
+    const lineHeight = 14;
+
+    const ensureSpace = (neededHeight: number, currentY: number) => {
+      if (currentY + neededHeight > pageHeight - margin) {
+        doc.addPage();
+        return margin;
+      }
+      return currentY;
+    };
+
+    const drawPageHeader = (y: number) => {
+      doc.setFillColor(30, 64, 175);
+      doc.roundedRect(margin, y, contentWidth, 72, 14, 14, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(20);
+      doc.text('BurnCare AI', margin + 18, y + 28);
+      doc.setFontSize(16);
+      doc.text('Patient Details Report', margin + 18, y + 50);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.text(`Generated: ${new Date().toLocaleString()}`, pageWidth - margin - 18, y + 28, { align: 'right' });
+      doc.text(`Patient ID: ${patient.id}`, pageWidth - margin - 18, y + 48, { align: 'right' });
+      doc.setTextColor(30, 41, 59);
+      return y + 94;
+    };
+
+    const drawSectionTitle = (title: string, y: number, accent = [37, 99, 235]) => {
+      y = ensureSpace(28, y);
+      doc.setFillColor(accent[0], accent[1], accent[2]);
+      doc.roundedRect(margin, y, 4, 18, 2, 2, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(13);
+      doc.text(title, margin + 12, y + 13);
+      return y + 24;
+    };
+
+    const drawCard = (x: number, y: number, width: number, title: string, lines: string[], accent: [number, number, number]) => {
+      const estimatedHeight = 46 + lines.length * lineHeight;
+      y = ensureSpace(estimatedHeight, y);
+      doc.setDrawColor(226, 232, 240);
+      doc.setFillColor(255, 255, 255);
+      doc.roundedRect(x, y, width, estimatedHeight, 10, 10, 'FD');
+      doc.setFillColor(accent[0], accent[1], accent[2]);
+      doc.roundedRect(x, y, width, 8, 10, 10, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(15, 23, 42);
+      doc.text(title, x + 12, y + 24);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      lines.forEach((line, index) => {
+        const wrapped = doc.splitTextToSize(line, width - 24);
+        doc.text(wrapped, x + 12, y + 38 + (index * lineHeight));
+      });
+      return y + estimatedHeight + 10;
+    };
+
+    const drawKeyValueGrid = (items: Array<{ label: string; value: string }>, y: number) => {
+      const rows = [] as Array<Array<{ label: string; value: string }>>;
+      for (let index = 0; index < items.length; index += 2) {
+        rows.push(items.slice(index, index + 2));
+      }
+
+      rows.forEach((row) => {
+        const left = row[0];
+        const right = row[1];
+        const rowHeight = 48;
+        y = ensureSpace(rowHeight + 10, y);
+
+        if (left) {
+          doc.setFillColor(248, 250, 252);
+          doc.setDrawColor(226, 232, 240);
+          doc.roundedRect(margin, y, cardWidth, rowHeight, 10, 10, 'FD');
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(9);
+          doc.setTextColor(71, 85, 105);
+          doc.text(left.label.toUpperCase(), margin + 12, y + 16);
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(11);
+          doc.setTextColor(15, 23, 42);
+          doc.text(left.value, margin + 12, y + 33);
+        }
+
+        if (right) {
+          const rightX = margin + cardWidth + columnGap;
+          doc.setFillColor(248, 250, 252);
+          doc.setDrawColor(226, 232, 240);
+          doc.roundedRect(rightX, y, cardWidth, rowHeight, 10, 10, 'FD');
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(9);
+          doc.setTextColor(71, 85, 105);
+          doc.text(right.label.toUpperCase(), rightX + 12, y + 16);
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(11);
+          doc.setTextColor(15, 23, 42);
+          doc.text(right.value, rightX + 12, y + 33);
+        }
+
+        y += rowHeight + 10;
+      });
+
+      return y;
+    };
+
+    const drawVitalsTable = (entries: VitalEntry[], y: number) => {
+      const visibleEntries = entries.slice(-5).reverse();
+      const rowHeight = 26;
+      const tableWidth = contentWidth;
+      const columns = [
+        { title: 'Time', width: 98 },
+        { title: 'Temp', width: 54 },
+        { title: 'HR', width: 44 },
+        { title: 'BP', width: 82 },
+        { title: 'SpO2', width: 54 },
+        { title: 'Urine', width: 58 },
+        { title: 'GCS', width: 70 },
+      ];
+
+      const totalNeeded = 34 + (visibleEntries.length + 1) * rowHeight;
+      y = ensureSpace(totalNeeded, y);
+
+      doc.setFillColor(15, 23, 42);
+      doc.roundedRect(margin, y, tableWidth, 22, 8, 8, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(255, 255, 255);
+
+      let x = margin + 10;
+      columns.forEach((column) => {
+        doc.text(column.title, x, y + 15);
+        x += column.width;
+      });
+
+      y += 22;
+      visibleEntries.forEach((entry, index) => {
+        const fill = index % 2 === 0 ? [248, 250, 252] as const : [255, 255, 255] as const;
+        doc.setFillColor(fill[0], fill[1], fill[2]);
+        doc.setDrawColor(226, 232, 240);
+        doc.roundedRect(margin, y, tableWidth, rowHeight, 0, 0, 'FD');
+
+        doc.setTextColor(15, 23, 42);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9.5);
+
+        let cellX = margin + 10;
+        const values = [
+          formatDateTime(entry.timestamp),
+          `${entry.temperature} C`,
+          `${entry.heartRate}`,
+          `${entry.systolicBP}/${entry.diastolicBP}`,
+          `${entry.spo2}`,
+          `${entry.urineOutput}`,
+          `E${entry.gcsEye} V${entry.gcsVerbal} M${entry.gcsMotor}`,
+        ];
+
+        values.forEach((value, valueIndex) => {
+          const columnWidth = columns[valueIndex].width;
+          const truncated = doc.splitTextToSize(value, columnWidth - 8);
+          doc.text(truncated, cellX, y + 17);
+          cellX += columnWidth;
+        });
+
+        y += rowHeight;
+      });
+
+      if (visibleEntries.length === 0) {
+        doc.setFillColor(248, 250, 252);
+        doc.setDrawColor(226, 232, 240);
+        doc.roundedRect(margin, y, tableWidth, rowHeight, 0, 0, 'FD');
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.setTextColor(71, 85, 105);
+        doc.text('No clinical monitoring entries available.', margin + 12, y + 17);
+        y += rowHeight;
+      }
+
+      return y + 8;
+    };
+
+    const drawParagraph = (text: string, y: number) => {
+      const wrapped = doc.splitTextToSize(text, contentWidth);
+      y = ensureSpace(wrapped.length * 14 + 10, y);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10.5);
+      doc.setTextColor(51, 65, 85);
+      doc.text(wrapped, margin, y + 12);
+      return y + wrapped.length * 14 + 8;
+    };
+
+    let y = margin;
+
+    y = drawPageHeader(y);
+
+    y = drawSectionTitle('Patient Snapshot', y, [37, 99, 235]);
+    y = drawKeyValueGrid([
+      { label: 'Name', value: patient.name || 'Unknown Patient' },
+      { label: 'Age', value: `${patient.age ?? 'N/A'}` },
+      { label: 'Gender', value: patient.gender || 'N/A' },
+      { label: 'Status', value: patient.status || 'Active' },
+      { label: 'Hospital', value: patient.hospital_name || patient.hospital_id || 'N/A' },
+      { label: 'Admitted', value: formatDateTime(patient.timestamp) },
+    ], y);
+
+    y = drawSectionTitle('Burn Profile', y, [249, 115, 22]);
+    y = drawKeyValueGrid([
+      { label: 'TBSA', value: `${patient.tbsa ?? 'N/A'}%` },
+      { label: 'Burn Depth', value: patient.burnDepth || 'N/A' },
+      { label: 'Inhalation Injury', value: patient.inhalationInjury ? 'Yes' : 'No' },
+      { label: 'Regions', value: (patient.burnedRegions && patient.burnedRegions.length > 0) ? patient.burnedRegions.join(', ') : 'Not specified' },
+    ], y);
+
+    y = drawSectionTitle('Lab Results', y, [139, 92, 246]);
+    y = drawKeyValueGrid([
+      { label: 'Platelets', value: `${patient.platelets ?? 'N/A'}` },
+      { label: 'Bilirubin', value: `${patient.bilirubin ?? 'N/A'}` },
+      { label: 'Creatinine', value: `${patient.creatinine ?? 'N/A'}` },
+    ], y);
+
+    y = drawSectionTitle('Respiratory Assessment', y, [6, 182, 212]);
+    y = drawKeyValueGrid([
+      { label: 'SpO2', value: `${patient.spo2 ?? 'N/A'}%` },
+      { label: 'PaO2', value: `${patient.pao2 ?? 'N/A'}` },
+      { label: 'FiO2', value: `${patient.fio2 ?? 'N/A'}%` },
+    ], y);
+
+    y = drawSectionTitle('Glasgow Coma Scale', y, [185, 28, 28]);
+    y = drawKeyValueGrid([
+      { label: 'Eye Opening', value: `${patient.gcsEye ?? 'N/A'}` },
+      { label: 'Verbal Response', value: `${patient.gcsVerbal ?? 'N/A'}` },
+      { label: 'Motor Response', value: `${patient.gcsMotor ?? 'N/A'}` },
+    ], y);
+
+    if (patient.bodyMapImage && patient.bodyMapImage.startsWith('data:image/')) {
+      y = ensureSpace(230, y);
+      y = drawSectionTitle('Burn Map Snapshot', y, [14, 165, 233]);
+      const imageHeight = 180;
+      doc.setFillColor(248, 250, 252);
+      doc.setDrawColor(226, 232, 240);
+      doc.roundedRect(margin, y, contentWidth, imageHeight + 18, 10, 10, 'FD');
+      try {
+        const imageFormat = patient.bodyMapImage.includes('image/png') ? 'PNG' : 'JPEG';
+        doc.addImage(patient.bodyMapImage, imageFormat, margin + 12, y + 10, contentWidth - 24, imageHeight);
+      } catch {
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.setTextColor(71, 85, 105);
+        doc.text('Unable to embed burn map image.', margin + 12, y + 30);
+      }
+      y += imageHeight + 30;
+    }
+
+    y = drawSectionTitle('Clinical Monitoring', y, [34, 197, 94]);
+    y = drawVitalsTable(patient.hourlyVitals || [], y);
+    y += sectionGap;
+
+    y = drawSectionTitle('AI Analysis', y, [99, 102, 241]);
+    y = drawCard(margin, y, contentWidth, 'Risk Summary', [
+      `Baseline Mortality Risk: ${patient.mortalityRiskPercent ?? 'N/A'}%`,
+      `Risk Level: ${patient.riskLevel || 'N/A'}`,
+    ], [99, 102, 241]);
+
+    y = drawParagraph(patient.reasoning || 'No reasoning available.', y);
+
+    doc.setDrawColor(203, 213, 225);
+    doc.setLineWidth(1);
+    doc.line(margin, pageHeight - 34, pageWidth - margin, pageHeight - 34);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(100, 116, 139);
+    doc.text('BurnCare AI - Confidential clinical report', margin, pageHeight - 18);
+    doc.text(`Patient ${patient.id}`, pageWidth - margin, pageHeight - 18, { align: 'right' });
+
+    return doc.output('blob');
+  };
+
+  const openPdfPreview = () => {
+    if (!patient) return;
+
+    setIsGeneratingPdf(true);
+    try {
+      const blob = generatePatientPdf();
+      if (!blob) return;
+
+      if (pdfUrl) {
+        URL.revokeObjectURL(pdfUrl);
+      }
+
+      const nextUrl = URL.createObjectURL(blob);
+      setPdfUrl(nextUrl);
+      setShowPdfPreview(true);
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
+
+  const downloadPdf = () => {
+    if (!pdfUrl || !patient) return;
+
+    const link = document.createElement('a');
+    link.href = pdfUrl;
+    link.download = `patient-${patient.id || 'record'}.pdf`;
+    link.click();
+  };
 
   if (!patient) {
     return (
@@ -123,6 +457,61 @@ export const PatientDetail: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      {showPdfPreview && pdfUrl && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center px-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowPdfPreview(false);
+            }
+          }}
+        >
+          <div className="absolute inset-0 bg-gray-900/70 backdrop-blur-sm" />
+          <div className="relative w-full max-w-5xl h-[90vh] bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-white">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-blue-600" />
+                  PDF Preview
+                </h3>
+                <p className="text-sm text-gray-500">Review the generated patient details before downloading.</p>
+              </div>
+              <button
+                onClick={() => setShowPdfPreview(false)}
+                className="rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                aria-label="Close preview"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 bg-gray-100">
+              <iframe
+                title="Patient PDF Preview"
+                src={pdfUrl}
+                className="w-full h-full border-0"
+              />
+            </div>
+
+            <div className="border-t border-gray-200 bg-white px-5 py-4 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-end">
+              <button
+                onClick={() => setShowPdfPreview(false)}
+                className="inline-flex items-center justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={downloadPdf}
+                className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Download PDF
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Top Navigation & Status Control */}
       <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <Link to="/patients" className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700">
@@ -158,6 +547,18 @@ export const PatientDetail: React.FC = () => {
             >
               {isUpdating ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Save className="w-3 h-3 mr-1" />}
               Update
+            </button>
+            <button
+              onClick={openPdfPreview}
+              disabled={isGeneratingPdf}
+              className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              {isGeneratingPdf ? (
+                <Loader2 className="w-3 h-3 animate-spin mr-1" />
+              ) : (
+                <Download className="w-3 h-3 mr-1" />
+              )}
+              Download patient Details
             </button>
           </div>
           {updateMessage && (
