@@ -90,6 +90,8 @@ export interface PatientRecord extends PatientInput, PredictionResult {
   id: string;
   timestamp: string;
   status: 'Active' | 'Deceased' | 'Discharged' | 'Recovered'; // Updated Terminology
+  hospital_id: string;
+  hospital_name?: string;
   hourlyVitals: VitalEntry[]; // New Field
 
   // Real-time Monitoring

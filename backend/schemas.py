@@ -97,6 +97,7 @@ class PatientResponse(PatientBase, PredictionResult):
     timestamp: str
     status: str
     hospital_id: Optional[str] = None
+    hospital_name: Optional[str] = None
     created_by: Optional[str] = None
     hourlyVitals: List[dict] = []
     

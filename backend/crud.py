@@ -82,13 +82,26 @@ def create_hospital(db: Session, hospital: schemas.HospitalCreate):
 
 # --- Patient CRUD ---
 def get_patient(db: Session, patient_id: str):
-    return db.query(models.Patient).filter(models.Patient.id == patient_id).first()
+    patient = db.query(models.Patient).filter(models.Patient.id == patient_id).first()
+    if patient and patient.hospital_id:
+        hospital = db.query(models.Hospital).filter(models.Hospital.id == patient.hospital_id).first()
+        if hospital:
+            patient.hospital_name = hospital.name
+    return patient
 
 def get_patients(db: Session, hospital_id: str = None, skip: int = 0, limit: int = 100):
     query = db.query(models.Patient)
     if hospital_id:
         query = query.filter(models.Patient.hospital_id == hospital_id)
-    return query.offset(skip).limit(limit).all()
+    patients = query.offset(skip).limit(limit).all()
+    
+    for patient in patients:
+        if patient.hospital_id:
+            hospital = db.query(models.Hospital).filter(models.Hospital.id == patient.hospital_id).first()
+            if hospital:
+                patient.hospital_name = hospital.name
+    
+    return patients
 
 def generate_patient_id(db: Session) -> str:
     patients = db.query(models.Patient.id).all()
