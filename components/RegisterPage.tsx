@@ -92,13 +92,13 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onBack }) => {
             <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-6">
               <UserPlus size={24} />
             </div>
-            <h2 className="text-2xl font-bold mb-4">Doctor Registration</h2>
+            <h2 className="text-2xl font-bold mb-4">Clinical Registration</h2>
             <p className="text-blue-100 text-sm leading-relaxed">
-              Join the BurnCare AI clinical network to access advanced triage decision support and patient monitoring tools.
+              Join the BurnCare AI clinical network as a Doctor or Staff member to access advanced triage decision support and patient monitoring tools.
             </p>
           </div>
           <div className="mt-8">
-            <button 
+            <button
               onClick={onBack}
               className="flex items-center text-sm font-medium text-blue-100 hover:text-white transition-colors"
             >
@@ -120,17 +120,15 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onBack }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Full Name</label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    name="full_name"
-                    required
-                    value={formData.full_name}
-                    onChange={handleChange}
-                    className="w-full pl-4 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                    placeholder="Dr. John Doe"
-                  />
-                </div>
+                <input
+                  type="text"
+                  name="full_name"
+                  required
+                  value={formData.full_name}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                  placeholder="Dr. John Doe"
+                />
               </div>
 
               <div className="space-y-1.5">
@@ -147,37 +145,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onBack }) => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center">
-                  <ClipboardCheck size={14} className="mr-1" /> License Number
-                </label>
-                <input
-                  type="text"
-                  name="license_number"
-                  required
-                  value={formData.license_number}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                  placeholder="MED-123456"
-                />
-              </div>
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center">
-                  <GraduationCap size={14} className="mr-1" /> Specialization
-                </label>
-                <input
-                  type="text"
-                  name="specialization"
-                  required
-                  value={formData.specialization}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                  placeholder="Burn Specialist"
-                />
-              </div>
-            </div>
 
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center">
@@ -225,6 +193,53 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onBack }) => {
                 />
               </div>
             </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Register As</label>
+              <select
+                name="role"
+                value={formData.role}
+                onChange={handleChange}
+                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all appearance-none font-bold text-blue-600 shadow-sm"
+              >
+                <option value="DOCTOR">Doctor</option>
+                <option value="STAFF">General Staff</option>
+              </select>
+            </div>
+
+            {formData.role === 'DOCTOR' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 animate-[fadeIn_0.3s_ease-out]">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center">
+                    <ClipboardCheck size={14} className="mr-1" /> License Number
+                  </label>
+                  <input
+                    type="text"
+                    name="license_number"
+                    required={formData.role === 'DOCTOR'}
+                    value={formData.license_number}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                    placeholder="MED-123456"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center">
+                    <GraduationCap size={14} className="mr-1" /> Specialization
+                  </label>
+                  <input
+                    type="text"
+                    name="specialization"
+                    required={formData.role === 'DOCTOR'}
+                    value={formData.specialization}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                    placeholder="Burn Specialist"
+                  />
+                </div>
+              </div>
+            )}
 
             <button
               type="submit"

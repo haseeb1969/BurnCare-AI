@@ -1,18 +1,53 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { apiService } from '../services/apiService';
 import { triageService } from '../services/triageService';
-import { PatientRecord, ManualOverride, TriageEntry } from '../types';
-import { Activity, AlertTriangle, Bed, UserCheck, UserX, Lock, Unlock, ShieldAlert } from 'lucide-react';
+import { PatientRecord, ManualOverride, TriageEntry, User } from '../types';
+import { Activity, AlertTriangle, Bed, UserCheck, UserX, Lock, Unlock, ShieldAlert, Save } from 'lucide-react';
+import { useAuth } from '../services/AuthContext';
+import axios from 'axios';
+import { toast } from 'react-hot-toast';
 
 export const TriageDashboard: React.FC = () => {
     const [patients, setPatients] = useState<PatientRecord[]>([]);
     const [loading, setLoading] = useState(true);
     const [totalBeds, setTotalBeds] = useState(5);
-    const [overrides, setOverrides] = useState<Record<string, ManualOverride>>({});
+    const { user } = useAuth();
+    const [isSyncing, setIsSyncing] = useState(false);
 
     useEffect(() => {
         fetchPatients();
+        fetchHospitalData();
     }, []);
+
+    const fetchHospitalData = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get('http://localhost:8000/hospitals/me', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setTotalBeds(response.data.total_icu_beds);
+        } catch (err) {
+            console.error('Failed to fetch hospital data', err);
+        }
+    };
+
+    const handleBedUpdate = async () => {
+        if (user?.role !== 'ADMIN') return;
+        setIsSyncing(true);
+        try {
+            const token = localStorage.getItem('token');
+            await axios.put('http://localhost:8000/hospitals/beds', 
+                { total_icu_beds: totalBeds },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            toast.success('ICU Capacity Updated');
+            fetchPatients(); // Refresh patients to get new triage
+        } catch (err) {
+            toast.error('Failed to update capacity');
+        } finally {
+            setIsSyncing(false);
+        }
+    };
 
     const fetchPatients = async () => {
         try {
@@ -25,22 +60,36 @@ export const TriageDashboard: React.FC = () => {
         }
     };
 
-    const toggleOverride = (id: string, type: ManualOverride) => {
-        setOverrides(prev => {
-            const next = { ...prev };
-            if (next[id] === type) {
-                delete next[id]; // Toggle off if same
-            } else {
-                next[id] = type;
-            }
-            return next;
-        });
+    const toggleOverride = async (id: string, type: ManualOverride) => {
+        const currentOverride = patients.find(p => p.id === id)?.triage_override;
+        const newOverride = currentOverride === type ? null : type;
+        
+        try {
+            await apiService.updateTriage(id, newOverride);
+            toast.success('Triage override updated');
+            fetchPatients();
+        } catch (err) {
+            toast.error('Failed to update override');
+        }
     };
 
-    // Run Allocation
+    // Allocation comes from backend now
     const allocation = useMemo(() => {
-        return triageService.runAllocation(patients, totalBeds, overrides);
-    }, [patients, totalBeds, overrides]);
+        return patients
+            .filter(p => p.status === 'Active')
+            .map(p => ({
+                patientId: p.id,
+                patientName: p.name,
+                mortalityRisk: p.currentMortalityRisk ?? p.mortalityRiskPercent ?? 0,
+                survivalProb: 100 - (p.currentMortalityRisk ?? p.mortalityRiskPercent ?? 0),
+                benefitScore: p.benefit_score ?? 0,
+                allocation: p.location as any,
+                override: p.triage_override as ManualOverride,
+                status: p.status,
+                riskSource: typeof p.currentMortalityRisk === 'number' ? 'Live' : 'Base'
+            }))
+            .sort((a, b) => (b.benefitScore || 0) - (a.benefitScore || 0));
+    }, [patients]);
 
     // Stats
     const bedsUsed = allocation.filter(a => a.allocation === 'ICU').length;
@@ -78,10 +127,21 @@ export const TriageDashboard: React.FC = () => {
                                     type="number"
                                     min="0"
                                     max="100"
+                                    disabled={user?.role !== 'ADMIN'}
                                     value={totalBeds}
                                     onChange={(e) => setTotalBeds(parseInt(e.target.value) || 0)}
-                                    className="w-20 p-1 border rounded text-lg font-bold text-center"
+                                    className={`w-20 p-1 border rounded text-lg font-bold text-center ${user?.role !== 'ADMIN' ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'}`}
                                 />
+                                {user?.role === 'ADMIN' && (
+                                    <button 
+                                        onClick={handleBedUpdate}
+                                        disabled={isSyncing}
+                                        className="p-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
+                                        title="Save ICU Capacity"
+                                    >
+                                        {isSyncing ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : <Save size={16} />}
+                                    </button>
+                                )}
                             </div>
                         </div>
                         <div className="h-8 w-px bg-gray-300 mx-2"></div>

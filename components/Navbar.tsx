@@ -1,11 +1,17 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Activity, LayoutList, PlusCircle, ShieldCheck, LogOut, User } from 'lucide-react';
 import { useAuth } from '../services/AuthContext';
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/', { replace: true });
+  };
 
   const isActive = (path: string) =>
     location.pathname === path
@@ -25,37 +31,51 @@ export const Navbar: React.FC = () => {
 
       <div className="flex-1 flex flex-col py-6 overflow-y-auto">
         <nav className="space-y-1">
-          <Link
-            to="/"
-            className={`flex items-center px-6 py-3 text-sm font-medium transition-colors ${isActive('/')}`}
-          >
-            <PlusCircle className="w-5 h-5 mr-3" />
-            New Prediction
-          </Link>
-          <Link
-            to="/patients"
-            className={`flex items-center px-6 py-3 text-sm font-medium transition-colors ${isActive('/patients')}`}
-          >
-            <LayoutList className="w-5 h-5 mr-3" />
-            Patient Registry
-          </Link>
-          <Link
-            to="/triage"
-            className={`flex items-center px-6 py-3 text-sm font-medium transition-colors ${isActive('/triage')}`}
-          >
-            <Activity className="w-5 h-5 mr-3" />
-            Triage Dashboard
-          </Link>
+          {user?.role !== 'ADMIN' && (
+            <>
+              <Link
+                to="/register-patient"
+                className={`flex items-center px-6 py-3 text-sm font-medium transition-colors ${isActive('/register-patient')}`}
+              >
+                <PlusCircle className="w-5 h-5 mr-3" />
+                New Prediction
+              </Link>
+              <Link
+                to="/patients"
+                className={`flex items-center px-6 py-3 text-sm font-medium transition-colors ${isActive('/patients')}`}
+              >
+                <LayoutList className="w-5 h-5 mr-3" />
+                Patient Registry
+              </Link>
+              <Link
+                to="/triage"
+                className={`flex items-center px-6 py-3 text-sm font-medium transition-colors ${isActive('/triage')}`}
+              >
+                <Activity className="w-5 h-5 mr-3" />
+                Triage Dashboard
+              </Link>
+            </>
+          )}
 
           {user?.role === 'ADMIN' && (
             <Link
-              to="/admin/approval"
-              className={`flex items-center px-6 py-3 text-sm font-medium transition-colors ${isActive('/admin/approval')}`}
+              to="/admin/dashboard"
+              className={`flex items-center px-6 py-3 text-sm font-medium transition-colors ${isActive('/admin/dashboard')}`}
             >
               <ShieldCheck className="w-5 h-5 mr-3" />
-              User Management
+              Admin Dashboard
             </Link>
           )}
+
+          <div className="pt-4 mt-4 border-t border-gray-100">
+            <Link
+              to="/profile"
+              className={`flex items-center px-6 py-3 text-sm font-medium transition-colors ${isActive('/profile')}`}
+            >
+              <User className="w-5 h-5 mr-3" />
+              My Profile
+            </Link>
+          </div>
         </nav>
       </div>
 
@@ -72,7 +92,7 @@ export const Navbar: React.FC = () => {
           </div>
         </div>
         <button
-          onClick={logout}
+          onClick={handleLogout}
           className="w-full flex items-center px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 rounded-lg transition-colors"
         >
           <LogOut className="w-5 h-5 mr-3" />

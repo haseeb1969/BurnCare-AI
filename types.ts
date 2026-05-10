@@ -23,10 +23,25 @@ export interface VitalEntry {
   gcsMotor: number;
 }
 
+export interface User {
+  id: string;
+  email: string;
+  full_name: string;
+  role: 'ADMIN' | 'DOCTOR' | 'STAFF';
+  assigned_location: 'Ward' | 'ICU' | 'N/A';
+  license_number?: string;
+  specialization?: string;
+  phone_number?: string;
+  hospital_id: string;
+  is_approved: boolean;
+  created_at: string;
+}
+
 export interface PatientInput {
   name: string;
   age: number;
   gender: Gender;
+  location: 'Ward' | 'ICU';
   tbsa: number;
   burnDepth: BurnDepth;
   inhalationInjury: boolean;
@@ -58,6 +73,9 @@ export interface PatientInput {
   gcsEye: number;
   gcsVerbal: number;
   gcsMotor: number;
+
+  triage_override?: ManualOverride;
+  benefit_score?: number;
 }
 
 export interface PredictionResult {

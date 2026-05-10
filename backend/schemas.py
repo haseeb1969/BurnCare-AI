@@ -12,6 +12,7 @@ class HospitalCreate(HospitalBase):
 
 class Hospital(HospitalBase):
     id: str
+    total_icu_beds: int
 
     class Config:
         orm_mode = True
@@ -21,6 +22,7 @@ class UserBase(BaseModel):
     email: EmailStr
     full_name: str
     role: str
+    assigned_location: Optional[str] = "Ward"
     license_number: Optional[str] = None
     specialization: Optional[str] = None
     phone_number: Optional[str] = None
@@ -30,7 +32,8 @@ class UserCreate(UserBase):
     password: str
 
 class UserUpdate(BaseModel):
-    is_approved: bool
+    is_approved: Optional[bool] = None
+    assigned_location: Optional[str] = None
 
 class User(UserBase):
     id: str
@@ -54,11 +57,14 @@ class PatientBase(BaseModel):
     age: int
     gender: str
     tbsa: float
+    location: Optional[str] = "Ward"
     burnDepth: str
     inhalationInjury: bool
     comorbidities: Optional[str] = None
     burnedRegions: List[str] = []
     bodyMapImage: Optional[str] = None
+    triage_override: Optional[str] = None
+    benefit_score: Optional[float] = None
 
     heartRate: float
     systolicBP: float

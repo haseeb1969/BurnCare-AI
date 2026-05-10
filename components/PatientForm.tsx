@@ -5,6 +5,8 @@ import { apiService } from '../services/apiService';
 import { BodyMapCanvas } from './BodyMapCanvas';
 import { Loader2, AlertTriangle, Wind, Activity, Heart, Brain, TestTube, Thermometer, Droplets, HelpCircle } from 'lucide-react';
 
+import { toast } from 'react-hot-toast';
+
 export const PatientForm: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -12,6 +14,7 @@ export const PatientForm: React.FC = () => {
     name: '',
     age: 45,
     gender: Gender.Male,
+    location: 'Ward',
     tbsa: 0,
     burnedRegions: [],
     burnDepth: BurnDepth.PartialThickness,
@@ -68,10 +71,11 @@ export const PatientForm: React.FC = () => {
     setLoading(true);
     try {
       const newRecord = await apiService.createPatient(formData);
+      toast.success('Patient record created successfully');
       navigate(`/patient/${newRecord.id}`);
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      console.error('Failed to create patient record.');
+      toast.error(error.response?.data?.detail || 'Failed to create patient record.');
     } finally {
       setLoading(false);
     }

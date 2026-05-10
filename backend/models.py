@@ -13,6 +13,7 @@ class Hospital(Base):
     id = Column(String, primary_key=True, default=generate_uuid)
     name = Column(String, index=True)
     address = Column(String, nullable=True)
+    total_icu_beds = Column(Integer, default=5)
 
     # Relationships
     users = relationship("User", back_populates="hospital")
@@ -25,7 +26,8 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
     full_name = Column(String)
-    role = Column(String) # "ADMIN", "DOCTOR"
+    role = Column(String) # "ADMIN", "DOCTOR", "STAFF"
+    assigned_location = Column(String, default="Ward") # "Ward", "ICU", "N/A"
     license_number = Column(String, nullable=True)
     specialization = Column(String, nullable=True)
     phone_number = Column(String, nullable=True)
@@ -43,6 +45,7 @@ class Patient(Base):
     id = Column(String, primary_key=True, index=True) 
     timestamp = Column(String)
     status = Column(String, default="Active")
+    location = Column(String, default="Ward") # "Ward", "ICU"
     
     # Multi-tenancy & Ownership
     hospital_id = Column(String, ForeignKey("hospitals.id"))
@@ -58,6 +61,8 @@ class Patient(Base):
     comorbidities = Column(String)
     burnedRegions = Column(JSON) # List of strings
     bodyMapImage = Column(Text, nullable=True) # Base64 drawing
+    triage_override = Column(String, nullable=True) # "ForceICU", "ForceWard", null
+    benefit_score = Column(Float, nullable=True)
 
     # Hemodynamics
     heartRate = Column(Float)

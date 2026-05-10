@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { UserCheck, UserX, Clock, ShieldCheck, Mail, Phone, Briefcase, FileText } from 'lucide-react';
 
+import { toast } from 'react-hot-toast';
+
 interface PendingUser {
   id: string;
   email: string;
@@ -41,13 +43,14 @@ const AdminApproval: React.FC = () => {
     setActioningId(userId);
     try {
       const token = localStorage.getItem('token');
-      await axios.put(`http://localhost:8000/auth/approve/${userId}`, 
+      await axios.put(`http://localhost:8000/auth/approve/${userId}`,
         { is_approved: approve },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setPendingUsers(prev => prev.filter(u => u.id !== userId));
+      toast.success(approve ? 'User Approved' : 'User Rejected');
     } catch (err: any) {
-      alert(err.response?.data?.detail || 'Action failed');
+      toast.error(err.response?.data?.detail || 'Action failed');
     } finally {
       setActioningId(null);
     }

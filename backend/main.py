@@ -76,6 +76,34 @@ def get_pending_doctors(
 ):
     return crud.get_pending_users(db, hospital_id=current_user.hospital_id)
 
+@app.get("/admin/users", response_model=List[schemas.User])
+def get_admin_users(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(check_role("ADMIN"))
+):
+    return crud.get_hospital_users(db, hospital_id=current_user.hospital_id)
+
+@app.put("/hospitals/beds", response_model=schemas.Hospital)
+def update_icu_beds(
+    payload: dict,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(check_role("ADMIN"))
+):
+    total_beds = payload.get("total_icu_beds")
+    if total_beds is None:
+        raise HTTPException(status_code=400, detail="total_icu_beds is required")
+    return crud.update_hospital_beds(db, hospital_id=current_user.hospital_id, total_beds=total_beds)
+
+@app.get("/hospitals/me", response_model=schemas.Hospital)
+def get_my_hospital(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    hospital = db.query(models.Hospital).filter(models.Hospital.id == current_user.hospital_id).first()
+    if not hospital:
+        raise HTTPException(status_code=404, detail="Hospital not found")
+    return hospital
+
 @app.put("/auth/approve/{user_id}", response_model=schemas.User)
 def approve_doctor(
     user_id: str,
@@ -90,7 +118,26 @@ def approve_doctor(
     if user.hospital_id != current_user.hospital_id:
         raise HTTPException(status_code=403, detail="Not authorized to approve users from other hospitals")
     
-    return crud.update_user_approval(db, user_id, approval.is_approved)
+    return crud.update_user(db, user_id, approval)
+
+@app.put("/admin/users/{user_id}", response_model=schemas.User)
+def update_user_details(
+    user_id: str,
+    updates: schemas.UserUpdate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(check_role("ADMIN"))
+):
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    if user.hospital_id != current_user.hospital_id:
+        raise HTTPException(status_code=403, detail="Not authorized to update users from other hospitals")
+    
+    updated_user = crud.update_user(db, user_id, updates)
+    if not updated_user:
+        raise HTTPException(status_code=404, detail="User not found or update failed")
+    return updated_user
 
 @app.get("/hospitals/", response_model=List[schemas.Hospital])
 def get_hospitals(db: Session = Depends(get_db)):
@@ -181,6 +228,27 @@ def update_patient(
     background_tasks.add_task(run_lstm_monitoring, patient_id)
         
     return updated
+
+@app.put("/patients/{patient_id}/triage", response_model=schemas.PatientResponse)
+def update_patient_triage(
+    patient_id: str,
+    payload: dict,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    patient = crud.get_patient(db, patient_id)
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    
+    override = payload.get("triage_override")
+    patient.triage_override = override
+    db.commit()
+    
+    # Recalculate hospital triage
+    crud.recalculate_hospital_triage(db, patient.hospital_id)
+    
+    db.refresh(patient)
+    return patient
 
 def run_lstm_monitoring(patient_id: str):
     """Background task to run LSTM prediction without blocking the main request."""

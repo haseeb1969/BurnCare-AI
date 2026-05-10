@@ -73,5 +73,15 @@ export const apiService = {
             console.error(`Error deleting patient ${id}:`, error);
             throw error;
         }
+    },
+
+    async updateTriage(id: string, override: ManualOverride): Promise<PatientRecord> {
+        try {
+            const response = await apiClient.put<PatientRecord>(`/patients/${id}/triage`, { triage_override: override });
+            return response.data;
+        } catch (error) {
+            console.error(`Error updating triage for patient ${id}:`, error);
+            throw error;
+        }
     }
 };
