@@ -16,7 +16,7 @@ A web application that predicts patient mortality risk trends based on vital-sig
 - Designed and connected frontend interface
 
 **How to Run:**  
-1. Clone the repository: `git clone https://github.com/yourusername/burncare-ai.git`  
+1. Clone the repository: `git clone https://github.com/haseeb1969/burncare-ai.git`  
 2. Install backend dependencies: `pip install -r requirements.txt`  
 3. Run FastAPI server: `uvicorn main:app --reload`  
 4. Open frontend in browser
