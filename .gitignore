@@ -70,3 +70,4 @@ backend/variability_results.txt
 
 # Gemini AI extension artifacts
 .gemini/
+*.db
