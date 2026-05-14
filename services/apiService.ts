@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { PatientInput, PatientRecord } from '../types';
+import { PatientInput, PatientRecord, ManualOverride } from '../types';
 
 const API_BASE_URL = 'http://localhost:8000';
 
@@ -81,6 +81,16 @@ export const apiService = {
             return response.data;
         } catch (error) {
             console.error(`Error updating triage for patient ${id}:`, error);
+            throw error;
+        }
+    },
+
+    async getMyPatients(): Promise<PatientRecord[]> {
+        try {
+            const response = await apiClient.get<PatientRecord[]>('/patients/my-assigned');
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching assigned patients:', error);
             throw error;
         }
     }

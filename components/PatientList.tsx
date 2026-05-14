@@ -111,6 +111,10 @@ export const PatientList: React.FC = () => {
     }
   };
 
+  const getLiveRiskLevel = (p: PatientRecord) => p.currentRiskLevel || p.riskLevel || 'N/A';
+  const getLiveMortality = (p: PatientRecord) => (typeof p.currentMortalityRisk === 'number' ? p.currentMortalityRisk : p.mortalityRiskPercent || 0);
+  const getLiveAllocation = (p: PatientRecord) => p.location || 'Ward';
+
   const getStatusBadge = (status: string) => {
     if (status === 'Deceased') {
       return <span className="inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">Deceased</span>;
@@ -393,11 +397,11 @@ export const PatientList: React.FC = () => {
                         </div>
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm">
-                        <span className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${getRiskColor(patient.riskLevel)}`}>
-                          {patient.riskLevel} Risk
+                        <span className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${getRiskColor(getLiveRiskLevel(patient))}`}>
+                          {getLiveRiskLevel(patient)} Risk
                         </span>
                         <div className="text-gray-500 mt-1 font-mono">
-                          {patient.mortalityRiskPercent.toFixed(1)}%
+                          {getLiveMortality(patient).toFixed(1)}% {typeof patient.currentMortalityRisk === 'number' && <span className="ml-2 text-xs text-blue-500">Live</span>}
                         </div>
                       </td>
                       <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">

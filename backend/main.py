@@ -181,6 +181,19 @@ def create_patient(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/patients/my-assigned", response_model=List[schemas.PatientResponse])
+def read_my_assigned_patients(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    # Doctors can only access their own assigned patients
+    if current_user.role != "DOCTOR":
+        raise HTTPException(status_code=403, detail="Only doctors can access assigned patients")
+    
+    return crud.get_patients_assigned_to_doctor(db, current_user.id, skip, limit)
+
 @app.get("/patients/", response_model=List[schemas.PatientResponse])
 def read_patients(
     skip: int = 0, 
@@ -188,8 +201,15 @@ def read_patients(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
-    # Doctors only see patients in their hospital
-    return crud.get_patients(db, hospital_id=current_user.hospital_id, skip=skip, limit=limit)
+    # Doctors only see patients in their hospital, and only in their assigned location.
+    location = current_user.assigned_location if current_user.role == "DOCTOR" else None
+    return crud.get_patients(
+        db,
+        hospital_id=current_user.hospital_id,
+        skip=skip,
+        limit=limit,
+        location=location,
+    )
 
 @app.get("/patients/{patient_id}", response_model=schemas.PatientResponse)
 def read_patient(

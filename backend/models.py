@@ -50,6 +50,7 @@ class Patient(Base):
     # Multi-tenancy & Ownership
     hospital_id = Column(String, ForeignKey("hospitals.id"))
     created_by = Column(String, ForeignKey("users.id"))
+    assigned_doctor_id = Column(String, nullable=True)
 
     # Patient Data
     name = Column(String)

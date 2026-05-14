@@ -92,6 +92,9 @@ export interface PatientRecord extends PatientInput, PredictionResult {
   status: 'Active' | 'Deceased' | 'Discharged' | 'Recovered'; // Updated Terminology
   hospital_id: string;
   hospital_name?: string;
+  assigned_doctor_id?: string;
+  assigned_doctor_name?: string;
+  assigned_doctor_location?: 'Ward' | 'ICU' | 'N/A';
   hourlyVitals: VitalEntry[]; // New Field
 
   // Real-time Monitoring

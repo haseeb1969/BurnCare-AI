@@ -238,6 +238,7 @@ const AdminDashboard: React.FC = () => {
                   <tr>
                     <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Patient</th>
                     <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Location</th>
+                    <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Assigned Doctor</th>
                     <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Risk Level</th>
                     <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Admission</th>
                   </tr>
@@ -251,24 +252,30 @@ const AdminDashboard: React.FC = () => {
                       </td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          patient.location === 'ICU' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'
+                          (patient.location === 'ICU') ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'
                         }`}>
                           <Bed size={12} className="mr-1" />
                           {patient.location || 'Ward'}
+                        </span>
+                        {typeof patient.currentMortalityRisk === 'number' && (
+                          <div className="text-[10px] text-blue-500 font-medium mt-1 flex items-center gap-1">
+                            <Activity size={10} /> Live
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-sm font-medium text-gray-900">
+                          {patient.assigned_doctor_name || <span className="text-gray-400 italic">Unassigned</span>}
                         </span>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex flex-col">
                           <span className={`text-sm font-bold ${
-                            patient.riskLevel === 'Critical' || patient.riskLevel === 'High' ? 'text-red-600' : 'text-green-600'
+                            (patient.currentRiskLevel || patient.riskLevel) === 'Critical' || (patient.currentRiskLevel || patient.riskLevel) === 'High' ? 'text-red-600' : 'text-green-600'
                           }`}>
-                            {patient.riskLevel}
+                            {patient.currentRiskLevel || patient.riskLevel}
                           </span>
-                          {patient.currentMortalityRisk !== null && (
-                            <span className="text-[10px] text-blue-500 font-medium flex items-center gap-1">
-                              <Activity size={10} /> Live Monitoring
-                            </span>
-                          )}
+                          <div className="text-xs text-gray-500 mt-1">{(typeof patient.currentMortalityRisk === 'number') ? `${patient.currentMortalityRisk.toFixed(1)}% (Live)` : `${patient.mortalityRiskPercent?.toFixed(1)}% (Baseline)`}</div>
                         </div>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-500">
@@ -278,7 +285,7 @@ const AdminDashboard: React.FC = () => {
                   ))}
                   {patients.length === 0 && (
                     <tr>
-                      <td colSpan={4} className="px-6 py-12 text-center text-gray-500 italic">
+                      <td colSpan={5} className="px-6 py-12 text-center text-gray-500 italic">
                         No patients currently registered in the system.
                       </td>
                     </tr>

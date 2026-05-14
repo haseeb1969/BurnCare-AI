@@ -99,6 +99,9 @@ class PatientResponse(PatientBase, PredictionResult):
     hospital_id: Optional[str] = None
     hospital_name: Optional[str] = None
     created_by: Optional[str] = None
+    assigned_doctor_id: Optional[str] = None
+    assigned_doctor_name: Optional[str] = None
+    assigned_doctor_location: Optional[str] = None
     hourlyVitals: List[dict] = []
     
     currentMortalityRisk: Optional[float] = None

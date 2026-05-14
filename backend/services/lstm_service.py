@@ -164,10 +164,6 @@ def prepare_sequence(patient):
 
 def predict_mortality(patient):
     history_count = len(patient.hourlyVitals) if patient.hourlyVitals else 0
-    if history_count < 4:
-        current_sofa = getattr(patient, 'sofaScore', 0.0) or 0.0
-        return None, "Insufficient Monitoring History", float(current_sofa)
-
     model = get_model()
     if not model:
         return 0.0, "Error", 0.0

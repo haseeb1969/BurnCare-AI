@@ -41,6 +41,13 @@ export const Navbar: React.FC = () => {
                 New Prediction
               </Link>
               <Link
+                to="/my-patients"
+                className={`flex items-center px-6 py-3 text-sm font-medium transition-colors ${isActive('/my-patients')}`}
+              >
+                <LayoutList className="w-5 h-5 mr-3" />
+                My Patients
+              </Link>
+              <Link
                 to="/patients"
                 className={`flex items-center px-6 py-3 text-sm font-medium transition-colors ${isActive('/patients')}`}
               >

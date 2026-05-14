@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:22L7933@localhost:5432/burncareai")
 
 def run_migration():
     if not DATABASE_URL or not DATABASE_URL.startswith("postgresql"):
@@ -31,6 +31,7 @@ def run_migration():
         print("Adding triage fields to patients...")
         cur.execute("ALTER TABLE patients ADD COLUMN IF NOT EXISTS triage_override VARCHAR;")
         cur.execute("ALTER TABLE patients ADD COLUMN IF NOT EXISTS benefit_score FLOAT;")
+        cur.execute("ALTER TABLE patients ADD COLUMN IF NOT EXISTS assigned_doctor_id VARCHAR;")
 
         conn.commit()
         cur.close()

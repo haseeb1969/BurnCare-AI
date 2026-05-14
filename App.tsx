@@ -3,6 +3,7 @@ import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { Navbar } from './components/Navbar';
 import { PatientForm } from './components/PatientForm';
 import { PatientList } from './components/PatientList';
+import { MyPatients } from './components/MyPatients';
 import { PatientDetail } from './components/PatientDetail';
 import { TriageDashboard } from './components/TriageDashboard';
 import AdminApproval from './components/AdminApproval';
@@ -45,6 +46,7 @@ const AppContent: React.FC = () => {
           {/* Clinical Routes */}
           <Route path="/register-patient" element={<PatientForm />} />
           <Route path="/patients" element={<PatientList />} />
+          <Route path="/my-patients" element={<MyPatients />} />
           <Route path="/patient/:id" element={<PatientDetail />} />
           <Route path="/triage" element={<TriageDashboard />} />
           <Route path="/profile" element={<ProfilePage />} />
@@ -78,4 +80,4 @@ const App: React.FC = () => {
   );
 };
 
-export default App;
+export default App;

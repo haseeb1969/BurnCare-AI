@@ -58,6 +58,60 @@ def update_hospital_beds(db: Session, hospital_id: str, total_beds: int):
         recalculate_hospital_triage(db, hospital_id)
     return db_hospital
 
+def get_doctors_by_location(db: Session, hospital_id: str):
+    doctors = db.query(models.User).filter(
+        models.User.hospital_id == hospital_id,
+        models.User.role == "DOCTOR",
+        models.User.is_approved == True
+    ).order_by(models.User.created_at.asc()).all()
+
+    by_location = {
+        "ICU": [d for d in doctors if d.assigned_location == "ICU"],
+        "Ward": [d for d in doctors if d.assigned_location == "Ward"],
+        "ALL": doctors
+    }
+    return by_location
+
+def rebalance_patient_doctor_assignments(db: Session, hospital_id: str, active_patients):
+    doctors_by_location = get_doctors_by_location(db, hospital_id)
+    all_doctors = doctors_by_location["ALL"]
+    if not all_doctors:
+        for p in active_patients:
+            p.assigned_doctor_id = None
+        return
+
+    load_by_doctor = {doctor.id: 0 for doctor in all_doctors}
+
+    # Deterministic ordering keeps assignment stable for equivalent loads.
+    ordered_patients = sorted(active_patients, key=lambda p: ((p.timestamp or ""), p.id or ""))
+    for patient in ordered_patients:
+        location = patient.location if patient.location in ("ICU", "Ward") else "Ward"
+        pool = doctors_by_location[location] if doctors_by_location[location] else all_doctors
+
+        chosen = min(pool, key=lambda d: (load_by_doctor[d.id], d.created_at or ""))
+        patient.assigned_doctor_id = chosen.id
+        load_by_doctor[chosen.id] += 1
+
+def attach_patient_context(db: Session, patient):
+    if not patient:
+        return patient
+
+    if patient.hospital_id:
+        hospital = db.query(models.Hospital).filter(models.Hospital.id == patient.hospital_id).first()
+        if hospital:
+            patient.hospital_name = hospital.name
+
+    patient.assigned_doctor_name = None
+    patient.assigned_doctor_location = None
+
+    if patient.assigned_doctor_id:
+        doctor = db.query(models.User).filter(models.User.id == patient.assigned_doctor_id).first()
+        if doctor:
+            patient.assigned_doctor_name = doctor.full_name
+            patient.assigned_doctor_location = doctor.assigned_location
+
+    return patient
+
 def recalculate_hospital_triage(db: Session, hospital_id: str):
     hospital = db.query(models.Hospital).filter(models.Hospital.id == hospital_id).first()
     if not hospital:
@@ -69,7 +123,10 @@ def recalculate_hospital_triage(db: Session, hospital_id: str):
     ).all()
     
     run_allocation(patients, hospital.total_icu_beds)
+    rebalance_patient_doctor_assignments(db, hospital_id, patients)
     db.commit()
+    for patient in patients:
+        attach_patient_context(db, patient)
     return patients
 
 # --- Hospital CRUD ---
@@ -83,23 +140,30 @@ def create_hospital(db: Session, hospital: schemas.HospitalCreate):
 # --- Patient CRUD ---
 def get_patient(db: Session, patient_id: str):
     patient = db.query(models.Patient).filter(models.Patient.id == patient_id).first()
-    if patient and patient.hospital_id:
-        hospital = db.query(models.Hospital).filter(models.Hospital.id == patient.hospital_id).first()
-        if hospital:
-            patient.hospital_name = hospital.name
-    return patient
+    return attach_patient_context(db, patient)
 
-def get_patients(db: Session, hospital_id: str = None, skip: int = 0, limit: int = 100):
+def get_patients(db: Session, hospital_id: str = None, skip: int = 0, limit: int = 100, location: str = None):
     query = db.query(models.Patient)
     if hospital_id:
         query = query.filter(models.Patient.hospital_id == hospital_id)
+    if location in ("Ward", "ICU"):
+        query = query.filter(models.Patient.location == location)
     patients = query.offset(skip).limit(limit).all()
     
     for patient in patients:
-        if patient.hospital_id:
-            hospital = db.query(models.Hospital).filter(models.Hospital.id == patient.hospital_id).first()
-            if hospital:
-                patient.hospital_name = hospital.name
+        attach_patient_context(db, patient)
+    
+    return patients
+
+def get_patients_assigned_to_doctor(db: Session, doctor_id: str, skip: int = 0, limit: int = 100):
+    query = db.query(models.Patient).filter(
+        models.Patient.assigned_doctor_id == doctor_id,
+        models.Patient.status == "Active"
+    )
+    patients = query.offset(skip).limit(limit).all()
+    
+    for patient in patients:
+        attach_patient_context(db, patient)
     
     return patients
 
@@ -159,9 +223,7 @@ def create_patient(db: Session, patient: schemas.PatientBase, prediction: schema
     
     # New patient added, recalculate triage for the whole hospital
     recalculate_hospital_triage(db, hospital_id)
-    db.refresh(db_patient)
-    
-    return db_patient
+    return get_patient(db, db_patient.id)
 
 def update_patient(db: Session, patient_id: str, updates: dict):
     db.query(models.Patient).filter(models.Patient.id == patient_id).update(updates)
@@ -185,4 +247,5 @@ def update_patient_risk(db: Session, patient_id: str, mortality: float, risk: st
         db.refresh(patient)
         # Risk changed, recalculate triage for the whole hospital
         recalculate_hospital_triage(db, patient.hospital_id)
+        return get_patient(db, patient_id)
     return patient

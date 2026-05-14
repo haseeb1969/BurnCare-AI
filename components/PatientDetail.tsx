@@ -75,6 +75,39 @@ export const PatientDetail: React.FC = () => {
     return Number.isNaN(parsed.getTime()) ? value : parsed.toLocaleString();
   };
 
+  const hasLiveRisk = typeof patient?.currentMortalityRisk === 'number' && !!patient?.currentRiskLevel;
+
+  const getLiveAllocationRecommendation = () => {
+    if (hasLiveRisk) {
+      return patient?.location || 'Ward';
+    }
+    return patient?.location || 'Ward';
+  };
+
+  const getClinicalRecommendations = () => {
+    if (!patient) {
+      return [] as string[];
+    }
+
+    if (hasLiveRisk) {
+      const liveRisk = patient.currentMortalityRisk ?? patient.mortalityRiskPercent;
+      const liveRiskLabel = patient.currentRiskLevel || patient.riskLevel || 'N/A';
+      const liveAllocation = getLiveAllocationRecommendation();
+
+      return [
+        `Live risk updated to ${liveRiskLabel}${typeof liveRisk === 'number' ? ` (${liveRisk.toFixed(1)}%)` : ''}.`,
+        `Recommended allocation: ${liveAllocation}.`,
+        liveAllocation === 'ICU'
+          ? 'Maintain ICU-level monitoring and reassess after each vital update.'
+          : 'Continue ward care with close observation and escalate if the live risk worsens.',
+      ];
+    }
+
+    return patient.recommendations?.length
+      ? patient.recommendations
+      : ['Awaiting live monitoring data to recalculate risk and recommendations.'];
+  };
+
   const generatePatientPdf = () => {
     if (!patient) return null;
 
@@ -287,6 +320,7 @@ export const PatientDetail: React.FC = () => {
       { label: 'Gender', value: patient.gender || 'N/A' },
       { label: 'Status', value: patient.status || 'Active' },
       { label: 'Hospital', value: patient.hospital_name || patient.hospital_id || 'N/A' },
+      { label: 'Assigned Doctor', value: patient.assigned_doctor_name ? `${patient.assigned_doctor_name} (${patient.assigned_doctor_location || patient.location || 'Ward'})` : 'Unassigned' },
       { label: 'Admitted', value: formatDateTime(patient.timestamp) },
     ], y);
 
@@ -343,12 +377,26 @@ export const PatientDetail: React.FC = () => {
     y += sectionGap;
 
     y = drawSectionTitle('AI Analysis', y, [99, 102, 241]);
+    const liveAllocation = getLiveAllocationRecommendation();
+    const liveRecommendations = getClinicalRecommendations();
     y = drawCard(margin, y, contentWidth, 'Risk Summary', [
       `Baseline Mortality Risk: ${patient.mortalityRiskPercent ?? 'N/A'}%`,
       `Risk Level: ${patient.riskLevel || 'N/A'}`,
+      typeof patient.currentMortalityRisk === 'number'
+        ? `Current Mortality Risk: ${patient.currentMortalityRisk.toFixed(1)}%`
+        : 'Current Mortality Risk: Pending monitoring data',
+      patient.currentRiskLevel
+        ? `Current Risk Level: ${patient.currentRiskLevel}`
+        : 'Current Risk Level: Pending monitoring data',
+      `Recommended Allocation: ${liveAllocation}`,
+      `Assigned Doctor: ${patient.assigned_doctor_name ? `${patient.assigned_doctor_name} (${patient.assigned_doctor_location || patient.location || 'Ward'})` : 'Unassigned'}`,
     ], [99, 102, 241]);
 
     y = drawParagraph(patient.reasoning || 'No reasoning available.', y);
+
+    if (liveRecommendations.length > 0) {
+      y = drawCard(margin, y, contentWidth, 'Live Recommendations', liveRecommendations, [14, 165, 233]);
+    }
 
     doc.setDrawColor(203, 213, 225);
     doc.setLineWidth(1);
@@ -447,11 +495,50 @@ export const PatientDetail: React.FC = () => {
     const updatedHistory = [...(patient.hourlyVitals || []), entry];
 
     try {
+      setUpdateMessage({ text: 'Saving vitals and recalculating mortality risk...', type: 'info' });
       await apiService.updatePatient(id, { hourlyVitals: updatedHistory });
-      setRefreshTrigger(prev => prev + 1);
-      setShowVitalsForm(false);
+      
+      // Wait for LSTM background task to complete (max 5 seconds with polling)
+      // The background task calculates new mortality risk based on updated vitals
+      let attempts = 0;
+      const maxAttempts = 10;
+      const pollInterval = 500; // 500ms between polls
+      
+      const pollForUpdate = async () => {
+        while (attempts < maxAttempts) {
+          await new Promise(resolve => setTimeout(resolve, pollInterval));
+          attempts++;
+          
+          try {
+            const freshPatient = await apiService.getPatient(id);
+            // Check if new risk has been calculated (currentRiskLevel should be set)
+            if (freshPatient.currentRiskLevel) {
+              setUpdateMessage({ 
+                text: `Vitals saved! Mortality risk updated: ${freshPatient.currentRiskLevel} (${freshPatient.currentMortalityRisk?.toFixed(1)}%)`, 
+                type: 'success' 
+              });
+              setRefreshTrigger(prev => prev + 1);
+              setShowVitalsForm(false);
+              return;
+            }
+          } catch (e) {
+            console.error('Error polling for risk update:', e);
+          }
+        }
+        
+        // If we timeout, still refresh with whatever we have
+        setUpdateMessage({ 
+          text: 'Vitals saved. Mortality risk calculation in progress...', 
+          type: 'info' 
+        });
+        setRefreshTrigger(prev => prev + 1);
+        setShowVitalsForm(false);
+      };
+      
+      pollForUpdate();
     } catch (e) {
       console.error('Failed to save vital entry', e);
+      setUpdateMessage({ text: 'Failed to save vitals', type: 'error' });
     }
   };
 
@@ -692,6 +779,14 @@ export const PatientDetail: React.FC = () => {
               {/* Add Vitals Form */}
               {showVitalsForm && isMonitoringActive && (
                 <form onSubmit={submitVitals} className="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-100">
+                  <div className="mb-4 p-3 bg-blue-100 border border-blue-300 rounded-md">
+                    <p className="text-sm text-blue-900 font-medium">
+                      ⚡ Automatic Risk Recalculation
+                    </p>
+                    <p className="text-xs text-blue-800 mt-1">
+                      When vitals are submitted, the AI model will recalculate mortality risk and resource allocation recommendation. Check "Current Status (LSTM)" above for updated predictions.
+                    </p>
+                  </div>
                   <h4 className="text-sm font-semibold text-blue-900 mb-3">Record New Vitals</h4>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                     <div>
@@ -783,6 +878,28 @@ export const PatientDetail: React.FC = () => {
                             'bg-green-100 text-green-800'}`}>
                         {patient.riskLevel} Risk
                       </span>
+                      {hasLiveRisk && (
+                        <div className="mt-3 space-y-1">
+                          <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-semibold 
+                              ${getLiveAllocationRecommendation() === 'ICU' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
+                            Live Recommendation: {getLiveAllocationRecommendation()}
+                          </span>
+                          <p className="text-[11px] text-gray-500">
+                            Updated from the latest monitored vitals.
+                          </p>
+                        </div>
+                      )}
+                      <div className="mt-2 space-y-1">
+                        <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-semibold 
+                            ${patient.location === 'ICU' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
+                          Recommended: {patient.location || 'Ward'}
+                        </span>
+                        <div>
+                          <span className="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-indigo-100 text-indigo-800">
+                            Doctor: {patient.assigned_doctor_name || 'Unassigned'}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
@@ -801,12 +918,19 @@ export const PatientDetail: React.FC = () => {
                                 'bg-green-100 text-green-800'}`}>
                             {patient.currentRiskLevel} Risk
                           </span>
+                          <span className={`inline-flex items-center justify-center px-2 py-1 rounded text-xs font-semibold 
+                              ${getLiveAllocationRecommendation() === 'ICU' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
+                            Recommended: {getLiveAllocationRecommendation()}
+                          </span>
+                          <span className="inline-flex items-center justify-center px-2 py-1 rounded text-xs font-semibold bg-indigo-100 text-indigo-800">
+                            Doctor: {patient.assigned_doctor_name || 'Unassigned'}
+                          </span>
                         </div>
                       </>
                     ) : (
                       <div className="h-40 flex flex-col items-center justify-center text-blue-300">
                         <Activity className="w-8 h-8 mb-2 opacity-50" />
-                        <span className="text-sm">{patient.currentRiskLevel || "Awaiting Data (Min 4h)"}</span>
+                        <span className="text-sm">{patient.currentRiskLevel || "Awaiting live risk calculation"}</span>
                       </div>
                     )}
                   </div>
@@ -823,8 +947,13 @@ export const PatientDetail: React.FC = () => {
                     <CheckCircle className="w-4 h-4 text-green-600" />
                     Clinical Recommendations
                   </h4>
+                  {hasLiveRisk && (
+                    <div className="mb-3 rounded-md border border-blue-100 bg-blue-50 p-3 text-sm text-blue-900">
+                      Live allocation recommendation: <span className="font-semibold">{getLiveAllocationRecommendation()}</span>
+                    </div>
+                  )}
                   <ul className="space-y-2">
-                    {patient.recommendations.map((rec, idx) => (
+                    {getClinicalRecommendations().map((rec, idx) => (
                       <li key={idx} className="flex items-start text-sm text-gray-600 bg-gray-50 p-3 rounded-md">
                         <span className="mr-2 text-blue-500 font-bold">•</span>
                         {rec}
