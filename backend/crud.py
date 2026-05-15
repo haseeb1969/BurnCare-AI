@@ -103,12 +103,20 @@ def attach_patient_context(db: Session, patient):
 
     patient.assigned_doctor_name = None
     patient.assigned_doctor_location = None
+    patient.baseline_assigned_doctor_name = None
+    patient.baseline_assigned_doctor_location = None
 
     if patient.assigned_doctor_id:
         doctor = db.query(models.User).filter(models.User.id == patient.assigned_doctor_id).first()
         if doctor:
             patient.assigned_doctor_name = doctor.full_name
             patient.assigned_doctor_location = doctor.assigned_location
+
+    if getattr(patient, 'baseline_assigned_doctor_id', None):
+        baseline_doctor = db.query(models.User).filter(models.User.id == patient.baseline_assigned_doctor_id).first()
+        if baseline_doctor:
+            patient.baseline_assigned_doctor_name = baseline_doctor.full_name
+            patient.baseline_assigned_doctor_location = baseline_doctor.assigned_location
 
     return patient
 
@@ -122,12 +130,126 @@ def recalculate_hospital_triage(db: Session, hospital_id: str):
         models.Patient.status == "Active"
     ).all()
     
-    run_allocation(patients, hospital.total_icu_beds)
-    rebalance_patient_doctor_assignments(db, hospital_id, patients)
+    # Compute allocation recommendations but DO NOT apply them automatically.
+    # This will return entries with recommended allocations.
+    entries = run_allocation(patients, hospital.total_icu_beds, apply_changes=False)
+
+    # Update benefit_score on patients and keep relocation notifications in sync
+    # with the latest mortality risk / recommendation.
+    for e in entries:
+        p = e["patient"]
+        p.benefit_score = e.get("benefit_score")
+        recommended = e.get("allocation")
+        current_location = p.location or 'Ward'
+
+        doctor_id = p.assigned_doctor_id
+        vitals_snapshot = None
+        try:
+            vitals_snapshot = p.hourlyVitals[-1] if p.hourlyVitals else None
+        except Exception:
+            vitals_snapshot = None
+
+        existing_pending = db.query(models.Notification).filter(
+            models.Notification.patient_id == p.id,
+            models.Notification.status == 'pending'
+        ).first()
+
+        if recommended and recommended != current_location:
+            # Relocation is needed: create/update pending request for the doctor.
+            if existing_pending:
+                existing_pending.doctor_id = doctor_id
+                existing_pending.hospital_id = p.hospital_id
+                existing_pending.proposed_location = recommended
+                existing_pending.proposedMortalityRisk = p.currentMortalityRisk or p.mortalityRiskPercent
+                existing_pending.vitals_snapshot = vitals_snapshot
+                existing_pending.original_location = current_location
+                existing_pending.original_assigned_doctor_id = p.assigned_doctor_id
+                existing_pending.created_at = datetime.now().isoformat()
+            else:
+                notif = models.Notification(
+                    patient_id=p.id,
+                    doctor_id=doctor_id,
+                    hospital_id=p.hospital_id,
+                    proposed_location=recommended,
+                    proposedMortalityRisk=p.currentMortalityRisk or p.mortalityRiskPercent,
+                    vitals_snapshot=vitals_snapshot,
+                    original_location=current_location,
+                    original_assigned_doctor_id=p.assigned_doctor_id,
+                )
+                db.add(notif)
+        else:
+            # No relocation needed anymore: remove stale pending request.
+            if existing_pending:
+                db.delete(existing_pending)
+
     db.commit()
+    # Attach context for returning
     for patient in patients:
         attach_patient_context(db, patient)
     return patients
+
+
+# --- Notification CRUD ---
+def get_notifications_for_doctor(db: Session, doctor_id: str, skip: int = 0, limit: int = 100):
+    query = db.query(models.Notification).filter(
+        models.Notification.doctor_id == doctor_id,
+        models.Notification.status == 'pending'
+    ).order_by(models.Notification.created_at.desc())
+    notifs = query.offset(skip).limit(limit).all()
+    return notifs
+
+def create_notification(db: Session, patient_id: str, doctor_id: str, hospital_id: str, proposed_location: str, mortality: float = None, vitals_snapshot = None):
+    notif = models.Notification(
+        patient_id=patient_id,
+        doctor_id=doctor_id,
+        hospital_id=hospital_id,
+        proposed_location=proposed_location,
+        proposedMortalityRisk=mortality,
+        vitals_snapshot=vitals_snapshot,
+    )
+    db.add(notif)
+    db.commit()
+    db.refresh(notif)
+    return notif
+
+def respond_notification(db: Session, notification_id: str, approver_id: str, action: str):
+    notif = db.query(models.Notification).filter(models.Notification.id == notification_id).first()
+    if not notif:
+        return None
+    if notif.status != 'pending':
+        return notif
+
+    if action not in ('approve','reject'):
+        return None
+
+    notif.status = 'approved' if action == 'approve' else 'rejected'
+    notif.responded_by = approver_id
+    notif.responded_at = datetime.now().isoformat()
+
+    # If approved, apply the allocation change
+    if action == 'approve':
+        patient = db.query(models.Patient).filter(models.Patient.id == notif.patient_id).first()
+        if patient:
+            patient.location = notif.proposed_location
+            db.commit()
+            # Rebalance doctor assignments now that locations have changed
+            active_patients = db.query(models.Patient).filter(models.Patient.hospital_id == notif.hospital_id, models.Patient.status == 'Active').all()
+            rebalance_patient_doctor_assignments(db, notif.hospital_id, active_patients)
+    else:
+        # If rejected, ensure we do not apply the proposed allocation.
+        # If some background process already applied the change erroneously, revert it to the original
+        # snapshot saved on the notification.
+        patient = db.query(models.Patient).filter(models.Patient.id == notif.patient_id).first()
+        if patient and getattr(notif, 'original_location', None):
+            if patient.location != notif.original_location:
+                patient.location = notif.original_location
+                db.commit()
+                active_patients = db.query(models.Patient).filter(models.Patient.hospital_id == notif.hospital_id, models.Patient.status == 'Active').all()
+                rebalance_patient_doctor_assignments(db, notif.hospital_id, active_patients)
+
+    db.commit()
+    db.refresh(notif)
+    return notif
 
 # --- Hospital CRUD ---
 def create_hospital(db: Session, hospital: schemas.HospitalCreate):
@@ -211,6 +333,7 @@ def create_patient(db: Session, patient: schemas.PatientBase, prediction: schema
         timestamp=datetime.now().isoformat(),
         status="Active",
         location=determined_location,
+        baseline_location=determined_location,
         hospital_id=hospital_id,
         created_by=user_id,
         **patient_data,
@@ -223,9 +346,42 @@ def create_patient(db: Session, patient: schemas.PatientBase, prediction: schema
     
     # New patient added, recalculate triage for the whole hospital
     recalculate_hospital_triage(db, hospital_id)
+
+    # Capture the initial assigned doctor after triage runs so it remains a
+    # stable baseline even if later relocations rebalance doctor assignment.
+    db.refresh(db_patient)
+    if not db_patient.baseline_assigned_doctor_id and db_patient.assigned_doctor_id:
+        db_patient.baseline_assigned_doctor_id = db_patient.assigned_doctor_id
+        db.commit()
+        db.refresh(db_patient)
+
     return get_patient(db, db_patient.id)
 
 def update_patient(db: Session, patient_id: str, updates: dict):
+    # If hourlyVitals provided, mirror the latest entry into top-level vitals
+    try:
+        if 'hourlyVitals' in updates and updates.get('hourlyVitals'):
+            last = updates['hourlyVitals'][-1]
+            # Map common vital fields from the last entry to patient columns
+            if isinstance(last, dict):
+                vitals_map = {
+                    'systolicBP': last.get('systolicBP'),
+                    'diastolicBP': last.get('diastolicBP'),
+                    'temperature': last.get('temperature'),
+                    'heartRate': last.get('heartRate'),
+                    'spo2': last.get('spo2'),
+                    'urineOutput': last.get('urineOutput'),
+                    'gcsEye': last.get('gcsEye'),
+                    'gcsVerbal': last.get('gcsVerbal'),
+                    'gcsMotor': last.get('gcsMotor')
+                }
+                # Only set keys that have non-None values
+                for k, v in vitals_map.items():
+                    if v is not None:
+                        updates[k] = v
+    except Exception:
+        pass
+
     db.query(models.Patient).filter(models.Patient.id == patient_id).update(updates)
     db.commit()
     return get_patient(db, patient_id)

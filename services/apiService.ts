@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { PatientInput, PatientRecord, ManualOverride } from '../types';
+import { PatientInput, PatientRecord, ManualOverride, NotificationRecord, Hospital, HospitalICUSummary } from '../types';
 
 const API_BASE_URL = 'http://localhost:8000';
 
@@ -91,6 +91,47 @@ export const apiService = {
             return response.data;
         } catch (error) {
             console.error('Error fetching assigned patients:', error);
+            throw error;
+        }
+    }
+    ,
+
+    async getMyHospital(): Promise<Hospital> {
+        try {
+            const response = await apiClient.get<Hospital>('/hospitals/me');
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching hospital details:', error);
+            throw error;
+        }
+    },
+
+    async getMyHospitalIcuSummary(): Promise<HospitalICUSummary> {
+        try {
+            const response = await apiClient.get<HospitalICUSummary>('/hospitals/me/icu-summary');
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching ICU summary:', error);
+            throw error;
+        }
+    },
+
+    async getMyNotifications(): Promise<NotificationRecord[]> {
+        try {
+            const response = await apiClient.get<NotificationRecord[]>('/notifications/my');
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching notifications:', error);
+            throw error;
+        }
+    },
+
+    async respondNotification(notificationId: string, action: 'approve' | 'reject') {
+        try {
+            const response = await apiClient.put(`/notifications/${notificationId}/respond`, { action });
+            return response.data;
+        } catch (error) {
+            console.error('Error responding to notification:', error);
             throw error;
         }
     }

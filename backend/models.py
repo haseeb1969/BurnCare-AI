@@ -46,11 +46,13 @@ class Patient(Base):
     timestamp = Column(String)
     status = Column(String, default="Active")
     location = Column(String, default="Ward") # "Ward", "ICU"
+    baseline_location = Column(String, nullable=True)
     
     # Multi-tenancy & Ownership
     hospital_id = Column(String, ForeignKey("hospitals.id"))
     created_by = Column(String, ForeignKey("users.id"))
     assigned_doctor_id = Column(String, nullable=True)
+    baseline_assigned_doctor_id = Column(String, nullable=True)
 
     # Patient Data
     name = Column(String)
@@ -107,3 +109,26 @@ class Patient(Base):
     # Relationships
     hospital = relationship("Hospital", back_populates="patients")
     creator = relationship("User", back_populates="created_patients")
+
+
+class Notification(Base):
+    __tablename__ = "notifications"
+
+    id = Column(String, primary_key=True, default=generate_uuid)
+    patient_id = Column(String, ForeignKey("patients.id"))
+    doctor_id = Column(String, ForeignKey("users.id"))
+    hospital_id = Column(String, ForeignKey("hospitals.id"))
+    proposed_location = Column(String)  # ICU or Ward
+    proposedMortalityRisk = Column(Float, nullable=True)
+    vitals_snapshot = Column(JSON, nullable=True)
+    original_location = Column(String, nullable=True)
+    original_assigned_doctor_id = Column(String, nullable=True)
+    status = Column(String, default="pending")  # pending, approved, rejected
+    created_at = Column(String, default=lambda: datetime.now().isoformat())
+    responded_by = Column(String, nullable=True)
+    responded_at = Column(String, nullable=True)
+
+    # Relationships
+    patient = relationship("Patient")
+    doctor = relationship("User")
+    hospital = relationship("Hospital")

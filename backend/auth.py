@@ -70,7 +70,9 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
 
 def check_role(role: str):
     async def role_checker(current_user: models.User = Depends(get_current_user)):
-        if current_user.role != role and current_user.role != "SYSTEM_ADMIN":
+        current_role = (current_user.role or "").upper()
+        required_role = (role or "").upper()
+        if current_role != required_role and current_role != "SYSTEM_ADMIN":
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You do not have enough permissions"

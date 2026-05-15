@@ -16,10 +16,11 @@ def calculate_benefit(mortality_risk: float) -> float:
     
     return max(0.0, benefit * 100.0)
 
-def run_allocation(patients: List[Any], total_beds: int) -> List[Any]:
+def run_allocation(patients: List[Any], total_beds: int, apply_changes: bool = True) -> List[Any]:
     """
     Runs the allocation algorithm on a list of patient models.
-    Updates the 'location' and 'benefit_score' fields in place (but doesn't commit).
+    Calculates benefit scores and returns allocation entries.
+    If `apply_changes` is True, updates the `location` on patient models in place.
     """
     active_patients = [p for p in patients if p.status == "Active"]
     
@@ -61,8 +62,15 @@ def run_allocation(patients: List[Any], total_beds: int) -> List[Any]:
         else:
             e["allocation"] = "Ward"
             
-    # 5. Update patient models
+    # 5. Update patient models (only if requested)
     for e in entries:
-        e["patient"].location = e["allocation"]
-        
-    return patients
+        if apply_changes:
+            e["patient"].location = e["allocation"]
+        else:
+            # annotate recommended allocation without applying
+            try:
+                e["patient"].recommended_allocation = e["allocation"]
+            except Exception:
+                pass
+
+    return entries

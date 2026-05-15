@@ -10,6 +10,8 @@ export const PatientList: React.FC = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [patients, setPatients] = useState<PatientRecord[]>([]);
   const [filteredPatients, setFilteredPatients] = useState<PatientRecord[]>([]);
+  const [totalIcuBeds, setTotalIcuBeds] = useState<number>(0);
+  const [icuPatientsCount, setIcuPatientsCount] = useState<number>(0);
 
   // Search & Filter State
   const [searchQuery, setSearchQuery] = useState('');
@@ -33,6 +35,19 @@ export const PatientList: React.FC = () => {
       }
     };
     fetchPatients();
+  }, []);
+
+  useEffect(() => {
+    const fetchHospitalSummary = async () => {
+      try {
+        const summary = await apiService.getMyHospitalIcuSummary();
+        setTotalIcuBeds(summary.total_icu_beds || 0);
+        setIcuPatientsCount(summary.icu_patients || 0);
+      } catch (err) {
+        console.error('Failed to load hospital ICU summary', err);
+      }
+    };
+    fetchHospitalSummary();
   }, []);
 
   // Filter Logic
@@ -114,6 +129,9 @@ export const PatientList: React.FC = () => {
   const getLiveRiskLevel = (p: PatientRecord) => p.currentRiskLevel || p.riskLevel || 'N/A';
   const getLiveMortality = (p: PatientRecord) => (typeof p.currentMortalityRisk === 'number' ? p.currentMortalityRisk : p.mortalityRiskPercent || 0);
   const getLiveAllocation = (p: PatientRecord) => p.location || 'Ward';
+  const getBaselineAllocation = (p: PatientRecord) => p.baseline_location || p.location || 'Ward';
+  const getBaselineDoctor = (p: PatientRecord) => p.baseline_assigned_doctor_name || p.assigned_doctor_name || 'Unassigned';
+  const icuUtilization = totalIcuBeds > 0 ? Math.min(100, Math.round((icuPatientsCount / totalIcuBeds) * 100)) : 0;
 
   const getStatusBadge = (status: string) => {
     if (status === 'Deceased') {
@@ -252,12 +270,25 @@ export const PatientList: React.FC = () => {
           </p>
         </div>
         <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:w-auto"
-          >
-            Add Patient
-          </Link>
+          <div className="rounded-xl border border-blue-100 bg-white px-4 py-3 shadow-sm min-w-[240px]">
+            <div className="text-xs font-semibold uppercase tracking-wide text-blue-600">Hospital-wide ICU Capacity</div>
+            <div className="mt-1 flex items-end justify-between gap-4">
+              <div>
+                <div className="text-2xl font-bold text-gray-900">{icuPatientsCount}/{totalIcuBeds || 'N/A'}</div>
+                <div className="text-xs text-gray-500">Beds occupied</div>
+              </div>
+              <div className="text-right">
+                <div className="text-lg font-semibold text-blue-700">{icuUtilization}%</div>
+                <div className="text-xs text-gray-500">Utilization</div>
+              </div>
+            </div>
+            <div className="mt-3 h-2 overflow-hidden rounded-full bg-blue-100">
+              <div
+                className="h-full rounded-full bg-blue-600"
+                style={{ width: `${icuUtilization}%` }}
+              />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -342,6 +373,16 @@ export const PatientList: React.FC = () => {
                     <th
                       scope="col"
                       className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 cursor-pointer group select-none hover:bg-gray-100 transition-colors"
+                      onClick={() => handleSort('benefit_score')}
+                    >
+                      <div className="flex items-center">
+                        Benefit Score
+                        {getSortIcon('benefit_score')}
+                      </div>
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 cursor-pointer group select-none hover:bg-gray-100 transition-colors"
                       onClick={() => handleSort('mortalityRiskPercent')}
                     >
                       <div className="flex items-center">
@@ -357,7 +398,7 @@ export const PatientList: React.FC = () => {
                 <tbody className="divide-y divide-gray-200 bg-white">
                   {sortedPatients.length === 0 && (
                     <tr>
-                      <td colSpan={6} className="py-10 text-center text-gray-500 text-sm">
+                      <td colSpan={7} className="py-10 text-center text-gray-500 text-sm">
                         {patients.length === 0
                           ? "No patient records found. Start a new prediction."
                           : "No patients match your search criteria."}
@@ -394,6 +435,14 @@ export const PatientList: React.FC = () => {
                               + Inhalation
                             </span>
                           )}
+                        </div>
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                        <div className="font-semibold text-gray-900">
+                          {typeof patient.benefit_score === 'number' ? patient.benefit_score.toFixed(2) : 'N/A'}
+                        </div>
+                        <div className="text-xs text-gray-400 mt-1">
+                          Higher means greater ICU benefit
                         </div>
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm">

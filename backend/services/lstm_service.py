@@ -129,14 +129,21 @@ def prepare_sequence(patient):
         history_list = list(patient.hourlyVitals)
 
     full_sequence = []
+    # Build sequence from historical hourly vitals. Each history entry
+    # overlays the top-level baseline vitals so missing fields are filled.
     for h in history_list:
         merged = base_vitals.copy()
         merged.update(h)
         full_sequence.append(merged)
-    full_sequence.append(base_vitals)
+
+    # If there are no hourlyVitals, use the baseline vitals as the single step.
+    if not full_sequence:
+        full_sequence.append(base_vitals)
 
     if len(full_sequence) > SEQ_LEN:
         full_sequence = full_sequence[-SEQ_LEN:]
+    # Pad by repeating the oldest available step at the start so the most
+    # recent measurements remain as the last timestep fed to the model.
     while len(full_sequence) < SEQ_LEN:
         full_sequence.insert(0, full_sequence[0])
 

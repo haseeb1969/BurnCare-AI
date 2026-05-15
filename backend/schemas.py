@@ -17,6 +17,12 @@ class Hospital(HospitalBase):
     class Config:
         orm_mode = True
 
+
+class HospitalICUSummary(BaseModel):
+    total_icu_beds: int
+    icu_patients: int
+    utilization_percent: int
+
 # --- User ---
 class UserBase(BaseModel):
     email: EmailStr
@@ -58,6 +64,7 @@ class PatientBase(BaseModel):
     gender: str
     tbsa: float
     location: Optional[str] = "Ward"
+    baseline_location: Optional[str] = None
     burnDepth: str
     inhalationInjury: bool
     comorbidities: Optional[str] = None
@@ -102,11 +109,33 @@ class PatientResponse(PatientBase, PredictionResult):
     assigned_doctor_id: Optional[str] = None
     assigned_doctor_name: Optional[str] = None
     assigned_doctor_location: Optional[str] = None
+    baseline_assigned_doctor_id: Optional[str] = None
+    baseline_assigned_doctor_name: Optional[str] = None
+    baseline_assigned_doctor_location: Optional[str] = None
     hourlyVitals: List[dict] = []
     
     currentMortalityRisk: Optional[float] = None
     currentRiskLevel: Optional[str] = None
     currentSofaScore: Optional[float] = None
+
+    class Config:
+        orm_mode = True
+
+
+class NotificationResponse(BaseModel):
+    id: str
+    patient_id: str
+    doctor_id: str
+    hospital_id: str
+    proposed_location: str
+    proposedMortalityRisk: Optional[float] = None
+    vitals_snapshot: Optional[dict] = None
+    original_location: Optional[str] = None
+    original_assigned_doctor_id: Optional[str] = None
+    status: str
+    created_at: Optional[str] = None
+    responded_by: Optional[str] = None
+    responded_at: Optional[str] = None
 
     class Config:
         orm_mode = True

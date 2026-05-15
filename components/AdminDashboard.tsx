@@ -34,6 +34,12 @@ const AdminDashboard: React.FC = () => {
   // Action Loading State
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
+  const getPatientBaselineLocation = (patient: PatientRecord) => patient.baseline_location || patient.location || 'Ward';
+  const getPatientBaselineDoctor = (patient: PatientRecord) => patient.baseline_assigned_doctor_name || patient.assigned_doctor_name || 'Unassigned';
+  const getPatientLiveLocation = (patient: PatientRecord) => patient.location || 'Ward';
+  const getPatientLiveRisk = (patient: PatientRecord) => patient.currentRiskLevel || patient.riskLevel || 'N/A';
+  const getPatientLiveMortality = (patient: PatientRecord) => (typeof patient.currentMortalityRisk === 'number' ? patient.currentMortalityRisk : patient.mortalityRiskPercent);
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -252,11 +258,14 @@ const AdminDashboard: React.FC = () => {
                       </td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          (patient.location === 'ICU') ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'
+                          (getPatientLiveLocation(patient) === 'ICU') ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'
                         }`}>
                           <Bed size={12} className="mr-1" />
-                          {patient.location || 'Ward'}
+                          {getPatientLiveLocation(patient)}
                         </span>
+                        <div className="text-[10px] text-gray-500 mt-1">
+                          Baseline: {getPatientBaselineLocation(patient)}
+                        </div>
                         {typeof patient.currentMortalityRisk === 'number' && (
                           <div className="text-[10px] text-blue-500 font-medium mt-1 flex items-center gap-1">
                             <Activity size={10} /> Live
@@ -267,15 +276,21 @@ const AdminDashboard: React.FC = () => {
                         <span className="text-sm font-medium text-gray-900">
                           {patient.assigned_doctor_name || <span className="text-gray-400 italic">Unassigned</span>}
                         </span>
+                        <div className="text-[10px] text-gray-500 mt-1">
+                          Baseline doctor: {getPatientBaselineDoctor(patient)}
+                        </div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex flex-col">
                           <span className={`text-sm font-bold ${
-                            (patient.currentRiskLevel || patient.riskLevel) === 'Critical' || (patient.currentRiskLevel || patient.riskLevel) === 'High' ? 'text-red-600' : 'text-green-600'
+                            getPatientLiveRisk(patient) === 'Critical' || getPatientLiveRisk(patient) === 'High' ? 'text-red-600' : 'text-green-600'
                           }`}>
-                            {patient.currentRiskLevel || patient.riskLevel}
+                            {getPatientLiveRisk(patient)}
                           </span>
-                          <div className="text-xs text-gray-500 mt-1">{(typeof patient.currentMortalityRisk === 'number') ? `${patient.currentMortalityRisk.toFixed(1)}% (Live)` : `${patient.mortalityRiskPercent?.toFixed(1)}% (Baseline)`}</div>
+                          <div className="text-xs text-gray-500 mt-1">{getPatientLiveMortality(patient) ? `${getPatientLiveMortality(patient)?.toFixed(1)}% (Live)` : `${patient.mortalityRiskPercent?.toFixed(1)}% (Baseline)`}</div>
+                          <div className="text-[10px] text-gray-500 mt-1">
+                            Baseline risk: {patient.mortalityRiskPercent?.toFixed(1) || 'N/A'}%
+                          </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-500">

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { apiService } from '../services/apiService';
 import { PatientRecord } from '../types';
-import { AlertCircle, Search, ArrowUp, ArrowDown, ArrowUpDown, Stethoscope } from 'lucide-react';
+import { AlertCircle, Search, ArrowUp, ArrowDown, ArrowUpDown, Stethoscope, Calendar } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export const MyPatients: React.FC = () => {
@@ -111,6 +111,9 @@ export const MyPatients: React.FC = () => {
     }
   };
 
+  const getLiveRiskLevel = (p: PatientRecord) => p.currentRiskLevel || p.riskLevel || 'N/A';
+  const getLiveMortality = (p: PatientRecord) => (typeof p.currentMortalityRisk === 'number' ? p.currentMortalityRisk : p.mortalityRiskPercent || 0);
+
   const getStatusBadge = (status: string) => {
     if (status === 'Deceased') {
       return <span className="inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">Deceased</span>;
@@ -176,7 +179,7 @@ export const MyPatients: React.FC = () => {
               onChange={(e) => setStatusFilter(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
             >
-              <option>All Status</option>
+              <option value="All">All Status</option>
               <option value="Active">Active</option>
               <option value="Discharged">Discharged</option>
               <option value="Recovered">Recovered</option>
@@ -187,7 +190,7 @@ export const MyPatients: React.FC = () => {
               onChange={(e) => setRiskFilter(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
             >
-              <option>All Risk</option>
+              <option value="All">All Risk</option>
               <option value="Low">Low</option>
               <option value="Moderate">Moderate</option>
               <option value="High">High</option>
@@ -215,17 +218,17 @@ export const MyPatients: React.FC = () => {
                   <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase cursor-pointer hover:bg-gray-100" onClick={() => handleSort('name')}>
                     Patient {getSortIcon('name')}
                   </th>
-                  <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase cursor-pointer hover:bg-gray-100" onClick={() => handleSort('location')}>
-                    Location {getSortIcon('location')}
-                  </th>
-                  <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase cursor-pointer hover:bg-gray-100" onClick={() => handleSort('riskLevel')}>
-                    Risk Level {getSortIcon('riskLevel')}
-                  </th>
-                  <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase cursor-pointer hover:bg-gray-100" onClick={() => handleSort('status')}>
-                    Status {getSortIcon('status')}
-                  </th>
                   <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase cursor-pointer hover:bg-gray-100" onClick={() => handleSort('timestamp')}>
-                    Admitted {getSortIcon('timestamp')}
+                    Date Admitted {getSortIcon('timestamp')}
+                  </th>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase cursor-pointer hover:bg-gray-100" onClick={() => handleSort('age')}>
+                    Demographics {getSortIcon('age')}
+                  </th>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase cursor-pointer hover:bg-gray-100" onClick={() => handleSort('tbsa')}>
+                    Burn Info {getSortIcon('tbsa')}
+                  </th>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase cursor-pointer hover:bg-gray-100" onClick={() => handleSort('mortalityRiskPercent')}>
+                    Risk Assessment {getSortIcon('mortalityRiskPercent')}
                   </th>
                   <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Action</th>
                 </tr>
@@ -233,27 +236,48 @@ export const MyPatients: React.FC = () => {
               <tbody className="divide-y divide-gray-200">
                 {sortedPatients.map(patient => (
                   <tr key={patient.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 font-medium text-gray-900">
-                      {patient.name}
-                      <div className="text-xs text-gray-400">ID: {patient.id}</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        patient.location === 'ICU' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'
-                      }`}>
-                        {patient.location || 'Ward'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getRiskColor(patient.riskLevel)}`}>
-                        {patient.riskLevel}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      {getStatusBadge(patient.status || 'Active')}
+                    <td className="px-6 py-4 text-sm">
+                      <div className="font-bold text-gray-900">{patient.name || 'Unknown'}</div>
+                      <div className="text-gray-500 flex items-center gap-2 mt-1 text-xs">
+                        <span className="font-mono">#{patient.id}</span>
+                        {getStatusBadge(patient.status || 'Active')}
+                      </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500">
-                      {new Date(patient.timestamp).toLocaleDateString()}
+                      <div className="flex items-center gap-1.5">
+                        <Calendar className="w-4 h-4 text-gray-400" />
+                        <span>{new Date(patient.timestamp).toLocaleDateString()}</span>
+                      </div>
+                      <div className="text-xs text-gray-400 pl-5.5 mt-0.5">
+                        {new Date(patient.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-500">
+                      <div className="text-gray-900">{patient.age} years</div>
+                      <div>{patient.gender}</div>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-500">
+                      <div className="text-gray-900 font-medium">{patient.tbsa}% TBSA</div>
+                      <div className="flex items-center gap-1 mt-1">
+                        <span className={`inline-flex items-center rounded px-2 py-0.5 text-xs font-medium ${
+                          (patient.location || 'Ward') === 'ICU' ? 'bg-red-50 text-red-700 ring-1 ring-inset ring-red-600/20' : 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-600/20'
+                        }`}>
+                          Location: {patient.location || 'Ward'}
+                        </span>
+                        {patient.inhalationInjury && (
+                          <span className="inline-flex items-center rounded bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20">
+                            + Inhalation
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      <span className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${getRiskColor(getLiveRiskLevel(patient))}`}>
+                        {getLiveRiskLevel(patient)} Risk
+                      </span>
+                      <div className="text-gray-500 mt-1 font-mono">
+                        {getLiveMortality(patient).toFixed(1)}% {typeof patient.currentMortalityRisk === 'number' && <span className="ml-2 text-xs text-blue-500">Live</span>}
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <Link

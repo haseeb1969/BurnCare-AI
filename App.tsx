@@ -4,6 +4,7 @@ import { Navbar } from './components/Navbar';
 import { PatientForm } from './components/PatientForm';
 import { PatientList } from './components/PatientList';
 import { MyPatients } from './components/MyPatients';
+import { DoctorNotifications } from './components/DoctorNotifications';
 import { PatientDetail } from './components/PatientDetail';
 import { TriageDashboard } from './components/TriageDashboard';
 import AdminApproval from './components/AdminApproval';
@@ -47,8 +48,11 @@ const AppContent: React.FC = () => {
           <Route path="/register-patient" element={<PatientForm />} />
           <Route path="/patients" element={<PatientList />} />
           <Route path="/my-patients" element={<MyPatients />} />
+          <Route path="/notifications" element={<DoctorNotifications />} />
           <Route path="/patient/:id" element={<PatientDetail />} />
-          <Route path="/triage" element={<TriageDashboard />} />
+          <Route path="/triage" element={
+            user.role === 'ADMIN' ? <TriageDashboard /> : <Navigate to="/patients" replace />
+          } />
           <Route path="/profile" element={<ProfilePage />} />
 
           {/* Admin Protected Routes */}

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { apiService } from '../services/apiService';
-import { PatientRecord, VitalEntry } from '../types';
+import { PatientRecord, VitalEntry, NotificationRecord } from '../types';
 import { RiskChart } from './RiskChart';
 import { BodyMap } from './BodyMap';
 import { VitalCharts } from './VitalCharts';
@@ -16,6 +16,7 @@ export const PatientDetail: React.FC = () => {
   const [showPdfPreview, setShowPdfPreview] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [pendingNotification, setPendingNotification] = useState<NotificationRecord | null>(null);
 
   // Status Management State
   const [editStatus, setEditStatus] = useState<PatientRecord['status']>('Active');
@@ -53,6 +54,21 @@ export const PatientDetail: React.FC = () => {
     fetchPatient();
   }, [id, refreshTrigger]);
 
+  // Fetch pending notifications for this doctor and patient
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      if (!patient) return;
+      try {
+        const notifs = await apiService.getMyNotifications();
+        const p = notifs.find(n => n.patient_id === patient.id && n.status === 'pending');
+        setPendingNotification(p || null);
+      } catch (e) {
+        console.error('Failed to fetch notifications for patient detail', e);
+      }
+    };
+    fetchNotifications();
+  }, [patient]);
+
   // Clear message after 3 seconds
   useEffect(() => {
     if (updateMessage) {
@@ -76,11 +92,14 @@ export const PatientDetail: React.FC = () => {
   };
 
   const hasLiveRisk = typeof patient?.currentMortalityRisk === 'number' && !!patient?.currentRiskLevel;
+  const baselineLocation = patient?.baseline_location || patient?.location || 'Ward';
+  const baselineDoctorName = patient?.baseline_assigned_doctor_name || patient?.assigned_doctor_name || 'Unassigned';
+  const baselineDoctorLocation = patient?.baseline_assigned_doctor_location || patient?.assigned_doctor_location || baselineLocation;
 
   const getLiveAllocationRecommendation = () => {
-    if (hasLiveRisk) {
-      return patient?.location || 'Ward';
-    }
+    // If there is a pending relocation notification, prefer its proposed location
+    if (pendingNotification) return pendingNotification.proposed_location;
+    // Fallback to patient's recorded location
     return patient?.location || 'Ward';
   };
 
@@ -320,7 +339,7 @@ export const PatientDetail: React.FC = () => {
       { label: 'Gender', value: patient.gender || 'N/A' },
       { label: 'Status', value: patient.status || 'Active' },
       { label: 'Hospital', value: patient.hospital_name || patient.hospital_id || 'N/A' },
-      { label: 'Assigned Doctor', value: patient.assigned_doctor_name ? `${patient.assigned_doctor_name} (${patient.assigned_doctor_location || patient.location || 'Ward'})` : 'Unassigned' },
+      { label: 'Assigned Doctor', value: baselineDoctorName !== 'Unassigned' ? `${baselineDoctorName} (${baselineDoctorLocation})` : 'Unassigned' },
       { label: 'Admitted', value: formatDateTime(patient.timestamp) },
     ], y);
 
@@ -388,8 +407,10 @@ export const PatientDetail: React.FC = () => {
       patient.currentRiskLevel
         ? `Current Risk Level: ${patient.currentRiskLevel}`
         : 'Current Risk Level: Pending monitoring data',
-      `Recommended Allocation: ${liveAllocation}`,
-      `Assigned Doctor: ${patient.assigned_doctor_name ? `${patient.assigned_doctor_name} (${patient.assigned_doctor_location || patient.location || 'Ward'})` : 'Unassigned'}`,
+      `Baseline Recommended Allocation: ${baselineLocation}`,
+      `Baseline Assigned Doctor: ${baselineDoctorName !== 'Unassigned' ? `${baselineDoctorName} (${baselineDoctorLocation})` : 'Unassigned'}`,
+      `Live Recommended Allocation: ${liveAllocation}`,
+      `Current Assigned Doctor: ${patient.assigned_doctor_name ? `${patient.assigned_doctor_name} (${patient.assigned_doctor_location || patient.location || 'Ward'})` : 'Unassigned'}`,
     ], [99, 102, 241]);
 
     y = drawParagraph(patient.reasoning || 'No reasoning available.', y);
@@ -891,12 +912,17 @@ export const PatientDetail: React.FC = () => {
                       )}
                       <div className="mt-2 space-y-1">
                         <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-semibold 
-                            ${patient.location === 'ICU' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
-                          Recommended: {patient.location || 'Ward'}
+                            ${baselineLocation === 'ICU' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
+                          Baseline Recommended: {baselineLocation}
                         </span>
+                        {pendingNotification && (
+                          <span className="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-yellow-100 text-yellow-800">
+                            Pending Relocation: {pendingNotification.proposed_location}
+                          </span>
+                        )}
                         <div>
                           <span className="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-indigo-100 text-indigo-800">
-                            Doctor: {patient.assigned_doctor_name || 'Unassigned'}
+                            Doctor: {baselineDoctorName}
                           </span>
                         </div>
                       </div>
@@ -950,6 +976,12 @@ export const PatientDetail: React.FC = () => {
                   {hasLiveRisk && (
                     <div className="mb-3 rounded-md border border-blue-100 bg-blue-50 p-3 text-sm text-blue-900">
                       Live allocation recommendation: <span className="font-semibold">{getLiveAllocationRecommendation()}</span>
+                    </div>
+                  )}
+
+                  {pendingNotification && (
+                    <div className="mb-3 rounded-md border border-yellow-200 bg-yellow-50 p-3 text-sm text-yellow-900">
+                      Pending relocation to <strong>{pendingNotification.proposed_location}</strong>. Approve or reject on the <a href="#/notifications" className="text-blue-600 underline">Notifications</a> page.
                     </div>
                   )}
                   <ul className="space-y-2">

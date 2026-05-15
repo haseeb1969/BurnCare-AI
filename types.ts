@@ -37,6 +37,19 @@ export interface User {
   created_at: string;
 }
 
+export interface Hospital {
+  id: string;
+  name: string;
+  address?: string;
+  total_icu_beds: number;
+}
+
+export interface HospitalICUSummary {
+  total_icu_beds: number;
+  icu_patients: number;
+  utilization_percent: number;
+}
+
 export interface PatientInput {
   name: string;
   age: number;
@@ -95,6 +108,10 @@ export interface PatientRecord extends PatientInput, PredictionResult {
   assigned_doctor_id?: string;
   assigned_doctor_name?: string;
   assigned_doctor_location?: 'Ward' | 'ICU' | 'N/A';
+  baseline_location?: 'Ward' | 'ICU';
+  baseline_assigned_doctor_id?: string;
+  baseline_assigned_doctor_name?: string;
+  baseline_assigned_doctor_location?: 'Ward' | 'ICU' | 'N/A';
   hourlyVitals: VitalEntry[]; // New Field
 
   // Real-time Monitoring
@@ -122,4 +139,18 @@ export interface TriageState {
   totalBeds: number;
   allocations: TriageEntry[];
   expectedSurvivors: number;
+}
+
+export interface NotificationRecord {
+  id: string;
+  patient_id: string;
+  doctor_id: string;
+  hospital_id: string;
+  proposed_location: 'ICU' | 'Ward';
+  proposedMortalityRisk?: number;
+  vitals_snapshot?: Partial<VitalEntry>;
+  status: 'pending' | 'approved' | 'rejected';
+  created_at?: string;
+  responded_by?: string;
+  responded_at?: string;
 }
