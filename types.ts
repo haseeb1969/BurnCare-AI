@@ -149,7 +149,7 @@ export interface NotificationRecord {
   proposed_location: 'ICU' | 'Ward';
   proposedMortalityRisk?: number;
   vitals_snapshot?: Partial<VitalEntry>;
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'pending' | 'approved' | 'rejected' | 'completed';
   created_at?: string;
   responded_by?: string;
   responded_at?: string;

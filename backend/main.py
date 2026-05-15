@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from typing import List
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 import models, schemas, crud, database
 from auth import (
@@ -226,8 +226,9 @@ def read_patients(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
-    # Doctors only see patients in their hospital, and only in their assigned location.
-    location = current_user.assigned_location if (current_user.role or "").upper() == "DOCTOR" else None
+    # Doctors and staff see patients in their hospital, and only in their assigned location.
+    role_upper = (current_user.role or "").upper()
+    location = current_user.assigned_location if role_upper in ("DOCTOR", "STAFF") else None
     return crud.get_patients(
         db,
         hospital_id=current_user.hospital_id,
@@ -337,6 +338,50 @@ def read_my_notifications(
         raise HTTPException(status_code=403, detail="Only doctors can view notifications")
     notifs = crud.get_notifications_for_doctor(db, current_user.id, skip, limit)
     return notifs
+
+
+@app.get("/notifications/staff", response_model=List[schemas.NotificationResponse])
+def read_staff_notifications(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    if (current_user.role or "").upper() != 'STAFF':
+        raise HTTPException(status_code=403, detail="Only staff can view staff notifications")
+
+    # Staff should see relocation requests that have been approved by doctors
+    # and that match their assigned location (ICU/Ward) within the same hospital.
+    notifs = crud.get_notifications_for_staff(db, current_user.hospital_id, current_user.assigned_location, skip, limit)
+    return notifs
+
+
+@app.put("/notifications/{notification_id}/complete", response_model=schemas.NotificationResponse)
+def complete_notification(
+    notification_id: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    if (current_user.role or "").upper() != 'STAFF':
+        raise HTTPException(status_code=403, detail="Only staff can complete staff notifications")
+
+    notif = db.query(models.Notification).filter(models.Notification.id == notification_id).first()
+    if not notif:
+        raise HTTPException(status_code=404, detail="Notification not found")
+
+    # Only staff assigned to the proposed location and same hospital can complete
+    if notif.hospital_id != current_user.hospital_id or notif.proposed_location != current_user.assigned_location:
+        raise HTTPException(status_code=403, detail="Not authorized to complete this notification")
+
+    if notif.status != 'approved':
+        raise HTTPException(status_code=400, detail="Notification is not in approved state")
+
+    notif.status = 'completed'
+    notif.responded_by = current_user.id
+    notif.responded_at = datetime.now().isoformat()
+    db.commit()
+    db.refresh(notif)
+    return notif
 
 
 @app.put("/notifications/{notification_id}/respond", response_model=schemas.NotificationResponse)

@@ -15,7 +15,11 @@ interface PendingUser {
   created_at: string;
 }
 
-const AdminApproval: React.FC = () => {
+interface AdminApprovalProps {
+  onApprove?: () => void;
+}
+
+const AdminApproval: React.FC<AdminApprovalProps> = ({ onApprove }) => {
   const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -48,6 +52,9 @@ const AdminApproval: React.FC = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setPendingUsers(prev => prev.filter(u => u.id !== userId));
+      if (approve && typeof onApprove === 'function') {
+        onApprove();
+      }
       toast.success(approve ? 'User Approved' : 'User Rejected');
     } catch (err: any) {
       toast.error(err.response?.data?.detail || 'Action failed');
