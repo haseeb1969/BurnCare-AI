@@ -48,18 +48,18 @@ export const Navbar: React.FC = () => {
                 My Patients
               </Link>
               <Link
+                to="/notifications"
+                className={`flex items-center px-6 py-3 text-sm font-medium transition-colors ${isActive('/notifications')}`}
+              >
+                <LayoutList className="w-5 h-5 mr-3" />
+                Notifications
+              </Link>
+              <Link
                 to="/patients"
                 className={`flex items-center px-6 py-3 text-sm font-medium transition-colors ${isActive('/patients')}`}
               >
                 <LayoutList className="w-5 h-5 mr-3" />
                 Patient Registry
-              </Link>
-              <Link
-                to="/triage"
-                className={`flex items-center px-6 py-3 text-sm font-medium transition-colors ${isActive('/triage')}`}
-              >
-                <Activity className="w-5 h-5 mr-3" />
-                Triage Dashboard
               </Link>
             </>
           )}

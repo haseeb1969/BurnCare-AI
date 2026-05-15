@@ -32,6 +32,14 @@ def run_migration():
         cur.execute("ALTER TABLE patients ADD COLUMN IF NOT EXISTS triage_override VARCHAR;")
         cur.execute("ALTER TABLE patients ADD COLUMN IF NOT EXISTS benefit_score FLOAT;")
         cur.execute("ALTER TABLE patients ADD COLUMN IF NOT EXISTS assigned_doctor_id VARCHAR;")
+        cur.execute("ALTER TABLE patients ADD COLUMN IF NOT EXISTS baseline_location VARCHAR;")
+        cur.execute("ALTER TABLE patients ADD COLUMN IF NOT EXISTS baseline_assigned_doctor_id VARCHAR;")
+
+        # Add notifications table
+        print("Creating notifications table if not exists...")
+        cur.execute("CREATE TABLE IF NOT EXISTS notifications (id VARCHAR PRIMARY KEY, patient_id VARCHAR, doctor_id VARCHAR, hospital_id VARCHAR, proposed_location VARCHAR, proposedMortalityRisk FLOAT, vitals_snapshot JSON, original_location VARCHAR, original_assigned_doctor_id VARCHAR, status VARCHAR DEFAULT 'pending', created_at VARCHAR, responded_by VARCHAR, responded_at VARCHAR);")
+        cur.execute("ALTER TABLE notifications ADD COLUMN IF NOT EXISTS original_location VARCHAR;")
+        cur.execute("ALTER TABLE notifications ADD COLUMN IF NOT EXISTS original_assigned_doctor_id VARCHAR;")
 
         conn.commit()
         cur.close()

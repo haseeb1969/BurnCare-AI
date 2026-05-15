@@ -104,6 +104,31 @@ def get_my_hospital(
         raise HTTPException(status_code=404, detail="Hospital not found")
     return hospital
 
+@app.get("/hospitals/me/icu-summary", response_model=schemas.HospitalICUSummary)
+def get_my_hospital_icu_summary(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    hospital = db.query(models.Hospital).filter(models.Hospital.id == current_user.hospital_id).first()
+    if not hospital:
+        raise HTTPException(status_code=404, detail="Hospital not found")
+
+    icu_patients = db.query(models.Patient).filter(
+        models.Patient.hospital_id == current_user.hospital_id,
+        models.Patient.status == "Active",
+        models.Patient.location == "ICU",
+    ).count()
+
+    utilization_percent = 0
+    if hospital.total_icu_beds and hospital.total_icu_beds > 0:
+        utilization_percent = min(100, round((icu_patients / hospital.total_icu_beds) * 100))
+
+    return {
+        "total_icu_beds": hospital.total_icu_beds or 0,
+        "icu_patients": icu_patients,
+        "utilization_percent": utilization_percent,
+    }
+
 @app.put("/auth/approve/{user_id}", response_model=schemas.User)
 def approve_doctor(
     user_id: str,
@@ -189,7 +214,7 @@ def read_my_assigned_patients(
     current_user: models.User = Depends(get_current_user)
 ):
     # Doctors can only access their own assigned patients
-    if current_user.role != "DOCTOR":
+    if (current_user.role or "").upper() != "DOCTOR":
         raise HTTPException(status_code=403, detail="Only doctors can access assigned patients")
     
     return crud.get_patients_assigned_to_doctor(db, current_user.id, skip, limit)
@@ -202,7 +227,7 @@ def read_patients(
     current_user: models.User = Depends(get_current_user)
 ):
     # Doctors only see patients in their hospital, and only in their assigned location.
-    location = current_user.assigned_location if current_user.role == "DOCTOR" else None
+    location = current_user.assigned_location if (current_user.role or "").upper() == "DOCTOR" else None
     return crud.get_patients(
         db,
         hospital_id=current_user.hospital_id,
@@ -298,3 +323,44 @@ def delete_patient(
          raise HTTPException(status_code=403, detail="Only Admins or the creator can delete records")
 
     return crud.delete_patient(db, patient_id)
+
+
+# --- Notifications ---
+@app.get("/notifications/my", response_model=List[schemas.NotificationResponse])
+def read_my_notifications(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    if current_user.role != 'DOCTOR':
+        raise HTTPException(status_code=403, detail="Only doctors can view notifications")
+    notifs = crud.get_notifications_for_doctor(db, current_user.id, skip, limit)
+    return notifs
+
+
+@app.put("/notifications/{notification_id}/respond", response_model=schemas.NotificationResponse)
+def respond_notification(
+    notification_id: str,
+    payload: dict,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    if (current_user.role or "").upper() != 'DOCTOR':
+        raise HTTPException(status_code=403, detail="Only doctors can respond to notifications")
+
+    # Only the assigned doctor can respond
+    notif = db.query(models.Notification).filter(models.Notification.id == notification_id).first()
+    if not notif:
+        raise HTTPException(status_code=404, detail="Notification not found")
+    if notif.doctor_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to respond to this notification")
+
+    action = payload.get('action')
+    if action not in ('approve','reject'):
+        raise HTTPException(status_code=400, detail="action must be 'approve' or 'reject'")
+
+    updated = crud.respond_notification(db, notification_id, current_user.id, action)
+    if not updated:
+        raise HTTPException(status_code=500, detail="Failed to process notification response")
+    return updated
