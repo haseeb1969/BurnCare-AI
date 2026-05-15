@@ -198,6 +198,31 @@ def get_notifications_for_doctor(db: Session, doctor_id: str, skip: int = 0, lim
     notifs = query.offset(skip).limit(limit).all()
     return notifs
 
+
+def get_notifications_for_staff(db: Session, hospital_id: str, location: str, skip: int = 0, limit: int = 100):
+    query = db.query(models.Notification).filter(
+        models.Notification.hospital_id == hospital_id,
+        models.Notification.status.in_(['approved', 'completed']),
+        models.Notification.proposed_location == location
+    ).order_by(models.Notification.created_at.desc())
+    notifs = query.offset(skip).limit(limit).all()
+    return notifs
+
+
+def complete_notification(db: Session, notification_id: str, staff_id: str):
+    notif = db.query(models.Notification).filter(models.Notification.id == notification_id).first()
+    if not notif:
+        return None
+    if notif.status != 'approved':
+        return None
+
+    notif.status = 'completed'
+    notif.responded_by = staff_id
+    notif.responded_at = datetime.now().isoformat()
+    db.commit()
+    db.refresh(notif)
+    return notif
+
 def create_notification(db: Session, patient_id: str, doctor_id: str, hospital_id: str, proposed_location: str, mortality: float = None, vitals_snapshot = None):
     notif = models.Notification(
         patient_id=patient_id,

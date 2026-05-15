@@ -5,6 +5,7 @@ import { PatientForm } from './components/PatientForm';
 import { PatientList } from './components/PatientList';
 import { MyPatients } from './components/MyPatients';
 import { DoctorNotifications } from './components/DoctorNotifications';
+import StaffNotifications from './components/StaffNotifications';
 import { PatientDetail } from './components/PatientDetail';
 import { TriageDashboard } from './components/TriageDashboard';
 import AdminApproval from './components/AdminApproval';
@@ -47,8 +48,13 @@ const AppContent: React.FC = () => {
           {/* Clinical Routes */}
           <Route path="/register-patient" element={<PatientForm />} />
           <Route path="/patients" element={<PatientList />} />
-          <Route path="/my-patients" element={<MyPatients />} />
+          <Route path="/my-patients" element={
+            (user.role || '').toUpperCase() === 'DOCTOR' ? <MyPatients /> : <Navigate to="/patients" replace />
+          } />
           <Route path="/notifications" element={<DoctorNotifications />} />
+          <Route path="/staff/notifications" element={
+            user.role === 'STAFF' ? <StaffNotifications /> : <Navigate to="/patients" replace />
+          } />
           <Route path="/patient/:id" element={<PatientDetail />} />
           <Route path="/triage" element={
             user.role === 'ADMIN' ? <TriageDashboard /> : <Navigate to="/patients" replace />

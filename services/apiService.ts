@@ -126,6 +126,26 @@ export const apiService = {
         }
     },
 
+    async getStaffNotifications(): Promise<NotificationRecord[]> {
+        try {
+            const response = await apiClient.get<NotificationRecord[]>('/notifications/staff');
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching staff notifications:', error);
+            throw error;
+        }
+    },
+
+    async completeNotification(notificationId: string) {
+        try {
+            const response = await apiClient.put(`/notifications/${notificationId}/complete`);
+            return response.data;
+        } catch (error) {
+            console.error('Error completing notification:', error);
+            throw error;
+        }
+    },
+
     async respondNotification(notificationId: string, action: 'approve' | 'reject') {
         try {
             const response = await apiClient.put(`/notifications/${notificationId}/respond`, { action });

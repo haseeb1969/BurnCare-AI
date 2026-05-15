@@ -312,7 +312,7 @@ const AdminDashboard: React.FC = () => {
         )}
 
         {activeTab === 'approvals' && (
-          <AdminApproval />
+          <AdminApproval onApprove={fetchData} />
         )}
 
         {activeTab === 'settings' && (
